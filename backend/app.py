@@ -1,13 +1,28 @@
+import os
 import joblib
 import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from serpapi_util import fetch_search_results
+from dotenv import load_dotenv
+from pathlib import Path
 
-# Create Flask app
+# Load .env file explicitly
+env_path = Path(__file__).parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
+print(f"DEBUG: Loaded .env file from: {env_path.resolve()}")
+serpapi_key = os.getenv('SERPAPI_KEY')
+if serpapi_key:
+    print(f"DEBUG: Loaded SERPAPI_KEY: {serpapi_key[:4]}****")
+else:
+    print("DEBUG: SERPAPI_KEY is not set or could not be loaded.")
+    
+# Initialize Flask app
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:5173"])
 
-# Global variables
+# Global model variables
 vectorizer = None
 scaler = None
 models = {}
@@ -15,41 +30,28 @@ models = {}
 def load_models():
     global vectorizer, scaler, models
     try:
-        # FIXED PATHS with 'backend/' prefix
-        vectorizer = joblib.load("backend/models/symptom_vectorizer.pkl")
-        print(f"✅ Vectorizer vocabulary size: {len(vectorizer.vocabulary_)}")
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        vectorizer = joblib.load(os.path.join(base_path, "models", "symptom_vectorizer.pkl"))
+        scaler = joblib.load(os.path.join(base_path, "models", "medical_scaler.pkl"))
+        models['logistic'] = joblib.load(os.path.join(base_path, "models", "best_medical_model_logistic_regression.pkl"))
 
-        scaler = joblib.load("backend/models/medical_scaler.pkl")
-
-        logistic_model = joblib.load("backend/models/best_medical_model_logistic_regression.pkl")
-        models['logistic'] = logistic_model
-
-        # Load ensemble model if available
         try:
-            ensemble_model = joblib.load("backend/models/ensemble_medical_model.pkl")
-            models['ensemble'] = ensemble_model
+            models['ensemble'] = joblib.load(os.path.join(base_path, "models", "ensemble_medical_model.pkl"))
             print("✅ Ensemble model loaded")
         except FileNotFoundError:
             print("ℹ️ Ensemble model not found, skipping...")
 
+        print(f"✅ Vectorizer loaded with vocab size: {len(vectorizer.vocabulary_)}")
         return True
-
     except Exception as e:
         print(f"❌ Error loading models: {e}")
         return False
-    
+
 def preprocess_input(data):
     try:
-        # Debug: print vectorizer type and attributes
-        print(f"Vectorizer type: {type(vectorizer)}")
-        if hasattr(vectorizer, 'idf_'):
-            print(f"Vectorizer idf_ shape: {vectorizer.idf_.shape}")
-        else:
-            print("Vectorizer does not have idf_ attribute")
-
-        # Extract and convert input fields
         symptom_text = data.get("symptoms", "")
         bp = data.get("blood_pressure", "0/0")
+
         try:
             sys, dia = map(int, bp.split("/"))
             bp_avg = (sys + dia) / 2
@@ -66,17 +68,14 @@ def preprocess_input(data):
 
         symptom_vec = vectorizer.transform([symptom_text])
         vital_vec = scaler.transform([vitals])
-        combined = np.hstack([symptom_vec.toarray(), vital_vec])
-        return combined
-
+        return np.hstack([symptom_vec.toarray(), vital_vec])
     except Exception as e:
-        print(f"❌ Error in preprocess_input: {e}")
+        print(f"❌ Preprocessing error: {e}")
         return None
-            
-# Load models once at startup
+
+# Load models
 load_models()
 
-# ✅ Prediction route
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
@@ -84,7 +83,7 @@ def predict():
         features = preprocess_input(data)
 
         if features is None:
-            return jsonify({"error": "Invalid input data"}), 400
+            return jsonify({"error": "Invalid input"}), 400
 
         predictions = {}
 
@@ -99,7 +98,19 @@ def predict():
             predictions['ensemble'] = {"prediction": pred, "confidence": float(prob)}
 
         return jsonify({"result": predictions})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
+@app.route("/api/treatment", methods=["POST"])
+def generate_treatment():
+    try:
+        data = request.get_json()
+        query = (
+            f"{data['disease']} treatment for a {data['age']}-year-old patient "
+            f"with symptoms {data['symptoms']}, blood group {data['bloodGroup']}, duration {data['duration']}"
+        )
+        results = fetch_search_results(query)
+        return jsonify({"results": results})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
