@@ -17,10 +17,12 @@ if serpapi_key:
     print(f"DEBUG: Loaded SERPAPI_KEY: {serpapi_key[:4]}****")
 else:
     print("DEBUG: SERPAPI_KEY is not set or could not be loaded.")
-    
+
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"])
+
+# ✅ Enable CORS correctly for frontend on port 5173
+CORS(app, origins="http://localhost:5173", supports_credentials=True)
 
 # Global model variables
 vectorizer = None
@@ -115,4 +117,4 @@ def generate_treatment():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=8000)
