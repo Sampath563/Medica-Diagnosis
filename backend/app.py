@@ -3,28 +3,120 @@ import joblib
 import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from serpapi_util import fetch_search_results
+from flask_mail import Mail, Message
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from pathlib import Path
+from pymongo import MongoClient
+from werkzeug.security import generate_password_hash, check_password_hash
+from serpapi_util import fetch_search_results
 
-# Load .env file explicitly
+# Load .env
 env_path = Path(__file__).parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
-print(f"DEBUG: Loaded .env file from: {env_path.resolve()}")
+# API Keys and Mail
 serpapi_key = os.getenv('SERPAPI_KEY')
-if serpapi_key:
-    print(f"DEBUG: Loaded SERPAPI_KEY: {serpapi_key[:4]}****")
-else:
-    print("DEBUG: SERPAPI_KEY is not set or could not be loaded.")
+gmail_user = os.getenv("MAIL_USERNAME")
 
-# Initialize Flask app
+# Flask App Setup
 app = Flask(__name__)
+# Configure CORS to allow frontend origin with proper headers
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
 
-# ✅ Enable CORS correctly for frontend on port 5173
-CORS(app, origins="http://localhost:5173", supports_credentials=True)
+@app.before_request
+def log_request_info():
+    print(f"Request method: {request.method}, Path: {request.path}")
+    if request.method == 'OPTIONS':
+        print("Handling preflight OPTIONS request")
+        
+# Mail Config
+app.config.update(
+    MAIL_SERVER=os.getenv("MAIL_SERVER"),
+    MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
+    MAIL_USERNAME=gmail_user,
+    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+    MAIL_USE_TLS=os.getenv("MAIL_USE_TLS", "True") == "True",
+    MAIL_USE_SSL=os.getenv("MAIL_USE_SSL", "False") == "True"
+)
+mail = Mail(app)
+        
+# MongoDB Setup
+mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+client = MongoClient(mongo_uri)
+db = client["medicalDB"]
+users = db["users"]
 
-# Global model variables
+# === 🔐 Auth & 2FA ===
+
+def generate_code():
+    return str(np.random.randint(100000, 999999))
+
+def send_verification_email(email, code):
+    try:
+        msg = Message("Your Verification Code", sender=gmail_user, recipients=[email])
+        msg.body = f"Your verification code is: {code}"
+        mail.send(msg)
+    except Exception as e:
+        print(f"❌ Email sending error: {e}")
+
+@app.route("/api/register", methods=["POST"])
+def register():
+    try:
+        data = request.get_json(force=True)  # <-- 🔥 Add force=True
+        email = data.get("email")
+        password = data.get("password")
+
+        if not email or not password:
+            return jsonify({"message": "Missing email or password"}), 400
+
+        if users.find_one({"email": email}):
+            return jsonify({"message": "User already exists"}), 400
+
+        hashed_password = generate_password_hash(password)
+        users.insert_one({"email": email, "password": hashed_password})
+        return jsonify({"message": "Registration successful"}), 201
+    except Exception as e:
+        print("Registration Error:", str(e))
+        return jsonify({"message": "Registration failed", "error": str(e)}), 500
+
+
+@app.route("/api/login-step1", methods=["POST"])
+def login_step1():
+    data = request.get_json()
+    email, password = data.get("email"), data.get("password")
+    user = users.find_one({"email": email})
+
+    if not user or not check_password_hash(user["password"], password):
+        return jsonify({"message": "Invalid credentials"}), 401
+
+    code = generate_code()
+    expiry = datetime.utcnow() + timedelta(minutes=5)
+    users.update_one({"email": email}, {"$set": {
+        "verification_code": code,
+        "code_expiry": expiry
+    }})
+
+    send_verification_email(email, code)
+    return jsonify({"message": "Verification code sent", "step": 2}), 200
+
+@app.route("/api/login-step2", methods=["POST"])
+def login_step2():
+    data = request.get_json()
+    email, code = data.get("email"), data.get("code")
+    user = users.find_one({"email": email})
+
+    if not user or user.get("verification_code") != code:
+        return jsonify({"message": "Invalid verification code"}), 401
+
+    if datetime.utcnow() > user.get("code_expiry"):
+        return jsonify({"message": "Code expired"}), 401
+
+    users.update_one({"email": email}, {"$unset": {"verification_code": "", "code_expiry": ""}})
+    return jsonify({"message": "Login successful", "token": "dummy_token"}), 200
+
+# === 🧠 Model + Prediction ===
+
 vectorizer = None
 scaler = None
 models = {}
@@ -53,7 +145,6 @@ def preprocess_input(data):
     try:
         symptom_text = data.get("symptoms", "")
         bp = data.get("blood_pressure", "0/0")
-
         try:
             sys, dia = map(int, bp.split("/"))
             bp_avg = (sys + dia) / 2
@@ -75,7 +166,6 @@ def preprocess_input(data):
         print(f"❌ Preprocessing error: {e}")
         return None
 
-# Load models
 load_models()
 
 @app.route("/predict", methods=["POST"])
@@ -83,12 +173,10 @@ def predict():
     try:
         data = request.get_json()
         features = preprocess_input(data)
-
         if features is None:
             return jsonify({"error": "Invalid input"}), 400
 
         predictions = {}
-
         if 'logistic' in models:
             pred = models['logistic'].predict(features)[0]
             prob = np.max(models['logistic'].predict_proba(features))
