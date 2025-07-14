@@ -2,14 +2,11 @@ import { useLocation } from 'react-router-dom';
 import React, { useState } from 'react';
 import { Activity, HeartPulse } from 'lucide-react';
 import NavigationBar from '../components/NavigationBar';
+
 const TreatmentPlanner: React.FC = () => {
-  // Mock location state for standalone version
+  const location = useLocation();
+  const state = location.state || { disease: '', age: '', symptoms: '' };
 
-const location = useLocation();
-const state = location.state || { disease: '', age: '', symptoms: '' };
-
-
-  // ✅ 2. Use state to prefill form
   const [formData, setFormData] = useState({
     disease: state.disease || '',
     age: state.age || '',
@@ -23,18 +20,62 @@ const state = location.state || { disease: '', age: '', symptoms: '' };
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showStandardTreatment, setShowStandardTreatment] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear validation error when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!formData.disease.trim()) {
+      errors.disease = 'Disease field is required';
+    }
+    
+    if (!formData.age.trim()) {
+      errors.age = 'Age field is required';
+    } else if (parseInt(formData.age) <= 0 || parseInt(formData.age) > 150) {
+      errors.age = 'Please enter a valid age (1-150)';
+    }
+    
+    if (!formData.duration.trim()) {
+      errors.duration = 'Duration field is required';
+    }
+    
+    if (!formData.symptoms.trim()) {
+      errors.symptoms = 'Symptoms field is required';
+    }
+    
+    if (!formData.bloodGroup) {
+      errors.bloodGroup = 'Blood group is required';
+    }
+    
+    return errors;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form before submitting
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      setError('Please fill in all required fields');
+      return;
+    }
+    
     setLoading(true);
     setTreatmentPlan('');
     setDiagnosis('');
     setError(null);
+    setValidationErrors({});
     setShowStandardTreatment(false);
 
     try {
@@ -67,33 +108,33 @@ const state = location.state || { disease: '', age: '', symptoms: '' };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <nav className="fixed top-0 left-0 right-0 bg-white shadow-lg z-50">
-  <div className="container mx-auto px-6">
-    <div className="flex items-center justify-between h-16">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-          <Activity className="w-5 h-5 text-white" />
-        </div>
-        <span className="text-xl font-bold text-gray-900">MEDICA</span>
-      </div>
-      <div className="flex items-center gap-8">
-        <a href="/" className="text-gray-900 font-medium flex items-center gap-2">
-          <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
-            <Activity className="w-4 h-4 text-white" />
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Activity className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold text-gray-900">MEDICA</span>
+            </div>
+            <div className="flex items-center gap-8">
+              <a href="/" className="text-gray-900 font-medium flex items-center gap-2">
+                <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
+                Home
+              </a>
+              <a href="/diagnosis" className="text-gray-700 hover:text-blue-600 transition-colors flex items-center gap-2">
+                <HeartPulse className="w-5 h-5" />
+                Health Diagnosis
+              </a>
+              <a href="/treatment" className="text-gray-700 hover:text-blue-600 transition-colors flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Treatment Planner
+              </a>
+            </div>
           </div>
-          Home
-        </a>
-        <a href="/diagnosis" className="text-gray-700 hover:text-blue-600 transition-colors flex items-center gap-2">
-          <HeartPulse className="w-5 h-5" />
-          Health Diagnosis
-        </a>
-        <a href="/treatment" className="text-gray-700 hover:text-blue-600 transition-colors flex items-center gap-2">
-          <Activity className="w-5 h-5" />
-          Treatment Planner
-        </a>
-      </div>
-    </div>
-  </div>
-</nav>
+        </div>
+      </nav>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8 pt-24">
@@ -120,43 +161,60 @@ const state = location.state || { disease: '', age: '', symptoms: '' };
               <h3 className="text-xl font-semibold text-gray-800">Patient Information</h3>
             </div>
 
-            <div className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {/* Disease */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Disease</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Disease <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   name="disease"
                   value={formData.disease}
                   onChange={handleChange}
                   placeholder="Enter disease name"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    validationErrors.disease ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
                 />
+                {validationErrors.disease && (
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.disease}</p>
+                )}
               </div>
 
               {/* Age and Blood Group Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Age <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="number"
                     name="age"
                     value={formData.age}
                     onChange={handleChange}
                     placeholder="Enter age"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    min="1"
+                    max="150"
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      validationErrors.age ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    }`}
                   />
+                  {validationErrors.age && (
+                    <p className="mt-1 text-sm text-red-600">{validationErrors.age}</p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Blood Group</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Blood Group <span className="text-red-500">*</span>
+                  </label>
                   <select
                     name="bloodGroup"
                     value={formData.bloodGroup}
                     onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      validationErrors.bloodGroup ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    }`}
                   >
                     <option value="">Select Blood Group</option>
                     <option value="A+">A+</option>
@@ -168,39 +226,54 @@ const state = location.state || { disease: '', age: '', symptoms: '' };
                     <option value="O+">O+</option>
                     <option value="O-">O-</option>
                   </select>
+                  {validationErrors.bloodGroup && (
+                    <p className="mt-1 text-sm text-red-600">{validationErrors.bloodGroup}</p>
+                  )}
                 </div>
               </div>
 
               {/* Duration */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Duration</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Duration <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   name="duration"
                   value={formData.duration}
                   onChange={handleChange}
                   placeholder="e.g., 2 weeks, 1 month"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    validationErrors.duration ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
                 />
+                {validationErrors.duration && (
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.duration}</p>
+                )}
               </div>
 
               {/* Symptoms */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Symptoms</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Symptoms <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   name="symptoms"
                   value={formData.symptoms}
                   onChange={handleChange}
                   placeholder="Describe symptoms (e.g., headache, fever, nausea, dizziness)"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    validationErrors.symptoms ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
                 />
+                {validationErrors.symptoms && (
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.symptoms}</p>
+                )}
               </div>
 
               <button
-                onClick={handleSubmit}
+                type="submit"
                 disabled={loading}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
@@ -213,7 +286,7 @@ const state = location.state || { disease: '', age: '', symptoms: '' };
                   'Generate Treatment Plan'
                 )}
               </button>
-            </div>
+            </form>
 
             {error && (
               <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">

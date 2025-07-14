@@ -40,10 +40,72 @@ const HealthDiagnosis: React.FC = () => {
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // New state for inline vital signs errors
+  const [tempError, setTempError] = useState<string | null>(null);
+  const [heartRateError, setHeartRateError] = useState<string | null>(null);
+  const [bpError, setBpError] = useState<string | null>(null);
+  const [oxygenSatError, setOxygenSatError] = useState<string | null>(null);
+  // New state for symptoms error
+  const [symptomsError, setSymptomsError] = useState<string | null>(null);
+
 const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+
+    // Clear symptoms error when user starts typing
+    if (name === 'symptoms') {
+      setSymptomsError(null);
+    }
+
+    // Validate vital signs on input change
+    if (name === 'temperature') {
+      const temp = parseFloat(value);
+      if (value === '') {
+        setTempError(null);
+      } else if (isNaN(temp) || temp < 95 || temp > 107) {
+        setTempError('Temperature must be between 95°F and 107°F');
+      } else {
+        setTempError(null);
+      }
+    } else if (name === 'heart_rate') {
+      const heartRate = parseInt(value, 10);
+      if (value === '') {
+        setHeartRateError(null);
+      } else if (isNaN(heartRate) || heartRate < 30 || heartRate > 220) {
+        setHeartRateError('Heart rate must be between 30 and 220 bpm');
+      } else {
+        setHeartRateError(null);
+      }
+    } else if (name === 'blood_pressure') {
+      if (value === '') {
+        setBpError(null);
+      } else {
+        const bpMatch = value.match(/^(\d{2,3})\/(\d{2,3})$/);
+        if (!bpMatch) {
+          setBpError('Blood pressure must be in format "Systolic/Diastolic" (e.g., 120/80)');
+        } else {
+          const systolic = parseInt(bpMatch[1], 10);
+          const diastolic = parseInt(bpMatch[2], 10);
+          if (systolic < 70 || systolic > 250 || diastolic < 40 || diastolic > 140) {
+            setBpError('Blood pressure values are out of valid range');
+          } else {
+            setBpError(null);
+          }
+        }
+      }
+    } else if (name === 'oxygen_saturation') {
+      const oxygenSat = parseInt(value, 10);
+      if (value === '') {
+        setOxygenSatError(null);
+      } else if (isNaN(oxygenSat) || oxygenSat < 80 || oxygenSat > 100) {
+        setOxygenSatError('Oxygen saturation must be between 80% and 100%');
+      } else {
+        setOxygenSatError(null);
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -51,56 +113,95 @@ const navigate = useNavigate();
   };
 
   const handleSubmit = async () => {
-    if (!formData.symptoms || !formData.age || !formData.gender || !formData.severity || 
-        !formData.temperature || !formData.heart_rate || !formData.blood_pressure || 
-        !formData.oxygen_saturation) {
-      setError('Please fill in all required fields');
-      return;
+  // Check required fields
+  if (!formData.symptoms || !formData.age || !formData.gender || !formData.severity || 
+      !formData.temperature || !formData.heart_rate || !formData.blood_pressure || 
+      !formData.oxygen_saturation) {
+    setError('Please fill in all required fields');
+    return;
+  }
+
+  // Also check if any inline vital sign errors exist before submission
+  if (tempError || heartRateError || bpError || oxygenSatError) {
+    setError('Please fix the errors in vital signs before submitting');
+    return;
+  }
+
+  // Validate symptoms
+  const allowedSymptoms = [
+    "abdominal pain", "back pain", "balance problems", "bloating", "blurred vision", "body pain",
+    "bone fractures", "bone pain", "burning sensation", "chest pain", "chest tightness", "chills",
+    "cold", "concentration problems", "confusion", "congestion", "constipation", "cough",
+    "diarrhea", "difficulty concentrating", "difficulty swallowing", "difficulty walking", "dizziness",
+    "dry mouth", "easy bruising", "excessive sweating", "facial pain", "fatigue", "fever",
+    "frequent infections", "frequent urination", "hair loss", "headache", "heartburn", "irritability",
+    "itching", "jaundice", "joint pain", "loss of appetite", "loss of height", "loss of taste",
+    "memory loss", "mood changes", "mucus production", "muscle weakness", "nausea", "neck pain",
+    "neck stiffness", "night sweats", "pale skin", "palpitations", "rapid breathing", "rapid heartbeat",
+    "rash", "rectal bleeding", "redness", "seizures", "sensitivity to light", "shortness of breath",
+    "skin rash", "sleep problems", "snoring", "sore throat", "stiffness", "sweating", "swelling",
+    "swollen glands", "swollen lymph nodes", "thirst", "tremor", "vomiting", "weakness", "weight gain",
+    "weight loss", "wheezing"
+  ];
+
+  const inputSymptoms = formData.symptoms
+    .toLowerCase()
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+
+  const invalidSymptoms = inputSymptoms.filter(symptom => !allowedSymptoms.includes(symptom));
+
+  if (invalidSymptoms.length > 0) {
+    setSymptomsError(`Invalid symptom(s): ${invalidSymptoms.join(', ')}`);
+    return;
+  }
+
+  // Proceed to backend submission
+  setLoading(true);
+  setError(null);
+  setSymptomsError(null);
+  setPrediction(null);
+
+  try {
+    const backendBaseUrl = 'http://localhost:8000';
+
+    const response = await fetch(`${backendBaseUrl}/predict`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to get prediction');
     }
-    
-    setLoading(true);
-    setError(null);
-    setPrediction(null);
 
-    try {
-      // Define backend API base URL - try port 8000 primarily, fallback to 5000 if needed
-      const backendBaseUrl = 'http://localhost:8000';
-
-      const response = await fetch(`${backendBaseUrl}/predict`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to get prediction');
-      }
-
-      const result = await response.json();
-      const backendPredictions = result.result || {};
-      const firstModelKey = Object.keys(backendPredictions)[0] || '';
-      const transformedPrediction = {
-        predicted_disease: firstModelKey ? backendPredictions[firstModelKey].prediction : '',
-        confidence: firstModelKey ? backendPredictions[firstModelKey].confidence : 0,
-        all_predictions: {} as { [key: string]: { disease: string; confidence: number } }
+    const result = await response.json();
+    const backendPredictions = result.result || {};
+    const firstModelKey = Object.keys(backendPredictions)[0] || '';
+    const transformedPrediction = {
+      predicted_disease: firstModelKey ? backendPredictions[firstModelKey].prediction : '',
+      confidence: firstModelKey ? backendPredictions[firstModelKey].confidence : 0,
+      all_predictions: {} as { [key: string]: { disease: string; confidence: number } }
+    };
+    for (const [model, pred] of Object.entries(backendPredictions)) {
+      const p = pred as { prediction: string; confidence: number };
+      transformedPrediction.all_predictions[model] = {
+        disease: p.prediction,
+        confidence: p.confidence
       };
-      for (const [model, pred] of Object.entries(backendPredictions)) {
-        const p = pred as { prediction: string; confidence: number };
-        transformedPrediction.all_predictions[model] = {
-          disease: p.prediction,
-          confidence: p.confidence
-        };
-      }
-      setPrediction(transformedPrediction);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
     }
-  };
+    setPrediction(transformedPrediction);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'An error occurred');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const resetForm = () => {
     setFormData({
@@ -115,6 +216,7 @@ const navigate = useNavigate();
     });
     setPrediction(null);
     setError(null);
+    setSymptomsError(null);
   };
 
   const navigateToTreatment = () => {
@@ -164,10 +266,15 @@ const navigate = useNavigate();
                     value={formData.symptoms}
                     onChange={handleInputChange}
                     placeholder="Describe symptoms (e.g., headache, fever, nausea, dizziness)"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      symptomsError ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     rows={3}
                     required
                   />
+                  {symptomsError && (
+                    <p className="text-red-500 text-sm mt-1">{symptomsError}</p>
+                  )}
                 </div>
 
                 {/* Basic Info */}
@@ -244,10 +351,13 @@ const navigate = useNavigate();
                         value={formData.temperature}
                         onChange={handleInputChange}
                         step="0.1"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          tempError ? 'border-red-500' : 'border-gray-300'
+                        }`}
                         placeholder="98.6"
                         required
                       />
+                      {tempError && <p className="text-red-500 text-sm mt-1">{tempError}</p>}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
@@ -259,10 +369,13 @@ const navigate = useNavigate();
                         name="heart_rate"
                         value={formData.heart_rate}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          heartRateError ? 'border-red-500' : 'border-gray-300'
+                        }`}
                         placeholder="72"
                         required
                       />
+                      {heartRateError && <p className="text-red-500 text-sm mt-1">{heartRateError}</p>}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -273,10 +386,13 @@ const navigate = useNavigate();
                         name="blood_pressure"
                         value={formData.blood_pressure}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          bpError ? 'border-red-500' : 'border-gray-300'
+                        }`}
                         placeholder="120/80"
                         required
                       />
+                      {bpError && <p className="text-red-500 text-sm mt-1">{bpError}</p>}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
@@ -288,12 +404,15 @@ const navigate = useNavigate();
                         name="oxygen_saturation"
                         value={formData.oxygen_saturation}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          oxygenSatError ? 'border-red-500' : 'border-gray-300'
+                        }`}
                         placeholder="98"
                         min="80"
                         max="100"
                         required
                       />
+                      {oxygenSatError && <p className="text-red-500 text-sm mt-1">{oxygenSatError}</p>}
                     </div>
                   </div>
                 </div>
