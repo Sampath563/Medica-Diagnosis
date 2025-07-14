@@ -50,7 +50,7 @@ const Login = () => {
         setMessage("📧 Verification code sent to your email.");
         setError("");
         setStep(2);
-        setTimeLeft(300);
+        setTimeLeft(600);
       }
     } catch (err: any) {
       setError(err.response?.data?.message || "Step 1 failed.");
@@ -85,7 +85,7 @@ const Login = () => {
       });
       setMessage("📧 New verification code sent.");
       setError("");
-      setTimeLeft(300);
+      setTimeLeft(600);
     } catch (err: any) {
       setError("Could not resend code.");
       setMessage("");
