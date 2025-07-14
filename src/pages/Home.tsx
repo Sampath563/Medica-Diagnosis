@@ -1,5 +1,6 @@
 import React from 'react';
 import { Activity, HeartPulse, ArrowRight, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
   return (

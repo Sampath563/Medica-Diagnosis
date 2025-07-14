@@ -21,7 +21,7 @@ const NavigationBar: React.FC = () => {
             <span className="text-xl font-bold text-gray-900">MEDICA</span>
           </div>
           <div className="flex items-center gap-8">
-            <Link to="/" className={linkClass('/')}>
+            <Link to="/home" className={linkClass('/home')}>
               <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
                 <Activity className="w-4 h-4 text-white" />
               </div>

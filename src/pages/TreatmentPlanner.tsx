@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { Activity, HeartPulse } from 'lucide-react';
 import NavigationBar from '../components/NavigationBar';
@@ -117,20 +117,20 @@ const TreatmentPlanner: React.FC = () => {
               <span className="text-xl font-bold text-gray-900">MEDICA</span>
             </div>
             <div className="flex items-center gap-8">
-              <a href="/" className="text-gray-900 font-medium flex items-center gap-2">
+              <Link to="/home" className="text-gray-900 font-medium flex items-center gap-2">
                 <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
                   <Activity className="w-4 h-4 text-white" />
                 </div>
                 Home
-              </a>
-              <a href="/diagnosis" className="text-gray-700 hover:text-blue-600 transition-colors flex items-center gap-2">
+              </Link>
+              <Link to="/diagnosis" className="text-gray-700 hover:text-blue-600 transition-colors flex items-center gap-2">
                 <HeartPulse className="w-5 h-5" />
                 Health Diagnosis
-              </a>
-              <a href="/treatment" className="text-gray-700 hover:text-blue-600 transition-colors flex items-center gap-2">
+              </Link>
+              <Link to="/treatment" className="text-gray-700 hover:text-blue-600 transition-colors flex items-center gap-2">
                 <Activity className="w-5 h-5" />
                 Treatment Planner
-              </a>
+              </Link>
             </div>
           </div>
         </div>

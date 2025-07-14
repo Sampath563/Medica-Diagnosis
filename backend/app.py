@@ -21,8 +21,9 @@ gmail_user = os.getenv("MAIL_USERNAME")
 
 # Flask App Setup
 app = Flask(__name__)
+CORS(app, origins=["http://localhost:5173"])  # <- Specific and safe
+
 # Configure CORS to allow frontend origin with proper headers
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
 
 @app.before_request
 def log_request_info():
