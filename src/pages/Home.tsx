@@ -1,6 +1,5 @@
 import React from 'react';
 import { Activity, HeartPulse, ArrowRight, Plus } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
 
 function Home() {
   return (
@@ -16,45 +15,20 @@ function Home() {
               <span className="text-xl font-bold text-white">MEDICA</span>
             </div>
             <div className="flex items-center gap-8">
-              <NavLink
-  to="/"
-  end
-  className={({ isActive }) =>
-    isActive
-      ? 'text-blue-300 font-bold flex items-center gap-2'
-      : 'text-white hover:text-blue-200 transition-colors flex items-center gap-2'
-  }
->
-  <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
-    <Activity className="w-2 h-2 text-white" />
-  </div>
-  Home
-</NavLink>
-
-<NavLink
-  to="/diagnosis"
-  className={({ isActive }) =>
-    isActive
-      ? 'text-blue-300 font-bold flex items-center gap-2'
-      : 'text-white hover:text-blue-200 transition-colors flex items-center gap-2'
-  }
->
-  <Activity className="w-4 h-4" />
-  Health Diagnosis
-</NavLink>
-
-<NavLink
-  to="/treatment-planner"
-  className={({ isActive }) =>
-    isActive
-      ? 'text-blue-300 font-bold flex items-center gap-2'
-      : 'text-white hover:text-blue-200 transition-colors flex items-center gap-2'
-  }
->
-  <HeartPulse className="w-4 h-4" />
-  Treatment Planner
-</NavLink>
-
+              <a href="/" className="text-white font-medium flex items-center gap-2">
+                <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
+                Home
+              </a>
+              <a href="/diagnosis" className="text-white hover:text-blue-200 transition-colors flex items-center gap-2">
+                <HeartPulse className="w-5 h-5" />
+                Health Diagnosis
+              </a>
+              <a href="/treatment" className="text-white hover:text-blue-200 transition-colors flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Treatment Planner
+              </a>
             </div>
           </div>
         </div>
@@ -81,19 +55,19 @@ function Home() {
               simplifying diagnosis and treatment planning through our innovative platform.
             </p>
 
-            {/* Action Buttons - Exact match to your image */}
+            {/* Action Buttons - Updated with icons instead of arrows */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a href="/diagnosis">
                 <button className="group bg-green-500 hover:bg-green-600 text-white text-lg font-semibold px-8 py-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center gap-3 min-w-[200px]">
+                  <HeartPulse className="w-5 h-5" />
                   Health Diagnosis
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
               </a>
               
               <a href="/treatment">
                 <button className="group bg-white text-blue-700 hover:bg-gray-50 text-lg font-semibold px-8 py-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center gap-3 min-w-[200px]">
+                  <Activity className="w-5 h-5" />
                   Treatment Planner
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
               </a>
             </div>
