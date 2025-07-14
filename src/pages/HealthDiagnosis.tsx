@@ -113,20 +113,6 @@ const navigate = useNavigate();
   };
 
   const handleSubmit = async () => {
-  // Check required fields
-  if (!formData.symptoms || !formData.age || !formData.gender || !formData.severity || 
-      !formData.temperature || !formData.heart_rate || !formData.blood_pressure || 
-      !formData.oxygen_saturation) {
-    setError('Please fill in all required fields');
-    return;
-  }
-
-  // Also check if any inline vital sign errors exist before submission
-  if (tempError || heartRateError || bpError || oxygenSatError) {
-    setError('Please fix the errors in vital signs before submitting');
-    return;
-  }
-
   // Validate symptoms
   const allowedSymptoms = [
     "abdominal pain", "back pain", "balance problems", "bloating", "blurred vision", "body pain",
@@ -144,34 +130,20 @@ const navigate = useNavigate();
     "weight loss", "wheezing"
   ];
 
-  const inputSymptoms = formData.symptoms
-    .toLowerCase()
-    .split(',')
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
-
-  const invalidSymptoms = inputSymptoms.filter(symptom => !allowedSymptoms.includes(symptom));
-
-  if (invalidSymptoms.length > 0) {
-    setSymptomsError(`Invalid symptom(s): ${invalidSymptoms.join(', ')}`);
-    return;
-  }
-
-  // Proceed to backend submission
   setLoading(true);
   setError(null);
   setSymptomsError(null);
   setPrediction(null);
 
   try {
-    const backendBaseUrl = 'http://localhost:8000';
+    const backendBaseUrl = import.meta.env.VITE_BACKEND_URL;
 
     const response = await fetch(`${backendBaseUrl}/predict`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(formData),
     });
 
     if (!response.ok) {
@@ -187,6 +159,7 @@ const navigate = useNavigate();
       confidence: firstModelKey ? backendPredictions[firstModelKey].confidence : 0,
       all_predictions: {} as { [key: string]: { disease: string; confidence: number } }
     };
+
     for (const [model, pred] of Object.entries(backendPredictions)) {
       const p = pred as { prediction: string; confidence: number };
       transformedPrediction.all_predictions[model] = {
@@ -194,6 +167,7 @@ const navigate = useNavigate();
         confidence: p.confidence
       };
     }
+
     setPrediction(transformedPrediction);
   } catch (err) {
     setError(err instanceof Error ? err.message : 'An error occurred');

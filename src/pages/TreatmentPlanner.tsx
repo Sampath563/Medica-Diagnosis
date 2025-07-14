@@ -79,7 +79,7 @@ const TreatmentPlanner: React.FC = () => {
     setShowStandardTreatment(false);
 
     try {
-      const response = await fetch('http://localhost:8000/api/treatment', {
+      const response = await fetch('https://medica-backend-3.onrender.com/api/treatment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
