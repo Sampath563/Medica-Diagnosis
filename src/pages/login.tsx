@@ -42,7 +42,7 @@ const Login = () => {
   const handleStep1 = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:8000/api/login-step1", {
+      const res = await axios.post("https://medica-backend-3.onrender.com/api/login-step1", {
         email: formData.email,
         password: formData.password,
       });
