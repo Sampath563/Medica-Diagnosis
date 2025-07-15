@@ -40,24 +40,30 @@ const Login = () => {
   };
 
   const handleStep1 = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post("https://medica-backend-3.onrender.com/api/login-step1", {
-        email: formData.email,
-        password: formData.password,
-      });
+  e.preventDefault();
+  console.log("📤 Sending login-step1 request with:", {
+    email: formData.email,
+    password: formData.password,
+  });
 
-      if (res.data.step === 2) {
-        setMessage("📧 Verification code sent to your email.");
-        setError("");
-        setStep(2);
-        setTimeLeft(600);
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Step 1 failed.");
-      setMessage("");
+  try {
+    const res = await axios.post("https://medica-backend-3.onrender.com/api/login-step1", {
+      email: formData.email,
+      password: formData.password,
+    });
+
+    if (res.data.step === 2) {
+      setMessage("📧 Verification code sent to your email.");
+      setError("");
+      setStep(2);
+      setTimeLeft(600);
     }
-  };
+  } catch (err: any) {
+    console.error("❌ login-step1 error:", err.response || err.message);
+    setError(err.response?.data?.message || "Step 1 failed.");
+    setMessage("");
+  }
+};
 
   const handleStep2 = async (e: React.FormEvent) => {
     e.preventDefault();
