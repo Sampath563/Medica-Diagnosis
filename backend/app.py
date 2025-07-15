@@ -18,14 +18,10 @@ load_dotenv(dotenv_path=env_path)
 
 # === Flask Setup ===
 app = Flask(__name__)
-CORS(app, origins=["https://dynamic-sunburst-5f73a6.netlify.app"], supports_credentials=True)
 
-@app.after_request
-def apply_cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = "https://dynamic-sunburst-5f73a6.netlify.app"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
-    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
-    return response
+# ✅ Enable CORS for all /api/* and /predict routes
+# Allow Netlify frontend
+CORS(app, origins=["https://dynamic-sunburst-5f73a6.netlify.app"], supports_credentials=True)
 
 @app.before_request
 def log_request_info():
@@ -47,7 +43,13 @@ mail = Mail(app)
 
 # === MongoDB Setup ===
 mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
-client = MongoClient(mongo_uri)
+client = MongoClient(
+    mongo_uri,
+    tls=True,
+    tlsAllowInvalidCertificates=True,  # <-- add this only temporarily if needed
+    serverSelectionTimeoutMS=5000
+)
+
 db = client["medicalDB"]
 users = db["users"]
 
@@ -95,38 +97,46 @@ def register():
 @app.route("/api/login-step1", methods=["POST"])
 def login_step1():
     try:
-        data = request.get_json(force=True)
-        email, password = data.get("email"), data.get("password")
+        print("🚨 login-step1 triggered")
 
-        print(f"📥 Received login for: {email}")
+        data = request.get_json(force=True)
+        print("📥 Received data:", data)
+
+        email = data.get("email")
+        password = data.get("password")
 
         if not email or not password:
+            print("⚠️ Missing email or password")
             return jsonify({"message": "Email and password required"}), 400
 
         user = users.find_one({"email": email})
+        print("👤 User found in DB:", user)
+
         if not user:
-            print("❌ User not found.")
+            print("❌ User not found")
             return jsonify({"message": "Invalid credentials"}), 401
 
         if not check_password_hash(user["password"], password):
-            print("❌ Password incorrect.")
+            print("❌ Password mismatch")
             return jsonify({"message": "Invalid credentials"}), 401
 
         code = generate_code()
         expiry = datetime.utcnow() + timedelta(minutes=5)
 
+        print("🔐 Generated code:", code)
         users.update_one({"email": email}, {"$set": {
             "verification_code": code,
             "code_expiry": expiry
         }})
 
         send_verification_email(email, code)
-        print(f"✅ Verification code sent to {email}")
-        return jsonify({"message": "Verification code sent", "step": 2}), 200
+        print("✅ Email sent")
 
+        return jsonify({"message": "Verification code sent", "step": 2}), 200
     except Exception as e:
-        print(f"🔥 Login error: {e}")
+        print("🔥 Exception occurred:", e)
         return jsonify({"message": "Login failed", "error": str(e)}), 500
+
 
 @app.route("/api/login-step2", methods=["POST"])
 def login_step2():
