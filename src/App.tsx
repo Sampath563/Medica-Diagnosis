@@ -1,22 +1,19 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+
 import Home from './pages/Home';
 import HealthDiagnosis from './pages/HealthDiagnosis';
 import TreatmentPlanner from './pages/TreatmentPlanner';
 import Login from './pages/login';
 import Register from './pages/register';
 
+// Function to validate token (you can expand this later for real JWT checks)
 const validateToken = (token: string | null) => {
   console.log("Validating token:", token);
-  // Add real validation logic here if using JWT or similar
-  // For now, accept 'dummy_token' as valid to avoid premature redirect
-  if (!token) {
-    console.log("Token invalid: null or empty");
-    return false;
-  }
-  return true;
+  return !!token; // true if token exists, false otherwise
 };
 
+// Protected Route wrapper
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const token = localStorage.getItem('token');
   if (!validateToken(token)) {
@@ -26,12 +23,18 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   return children;
 };
 
+// App routing
 function App() {
   return (
     <Routes>
+      {/* Default route redirects to login */}
       <Route path="/" element={<Navigate to="/login" replace />} />
+
+      {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      {/* Protected Routes */}
       <Route
         path="/home"
         element={
@@ -64,7 +67,8 @@ function App() {
           </ProtectedRoute>
         }
       />
-      {/* Catch all unmatched routes */}
+
+      {/* Fallback for unknown routes */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
