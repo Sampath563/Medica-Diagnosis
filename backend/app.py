@@ -10,22 +10,24 @@ from pathlib import Path
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 from serpapi_util import fetch_search_results
+import gdown
 
-# Load .env
+# Load environment variables
 env_path = Path(__file__).parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
-# API Keys and Mail
-serpapi_key = os.getenv('SERPAPI_KEY')
-gmail_user = os.getenv("MAIL_USERNAME")
-
-# Flask App Setup
+# Flask setup
 app = Flask(__name__)
-CORS(app, origins=[
-    "http://localhost:5173", 
+CORS(app, resources={r"/*": {"origins": [
+    "http://localhost:5173",
     "https://dynamic-sunburst-5f73a6.netlify.app"
-])
+]}}, supports_credentials=True)
 
+@app.after_request
+def apply_cors_headers(response):
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+    return response
 
 @app.before_request
 def log_request_info():
@@ -33,7 +35,8 @@ def log_request_info():
     if request.method == 'OPTIONS':
         print("Handling preflight OPTIONS request")
 
-# Mail Config
+# Mail configuration
+gmail_user = os.getenv("MAIL_USERNAME")
 app.config.update(
     MAIL_SERVER=os.getenv("MAIL_SERVER"),
     MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
@@ -44,14 +47,14 @@ app.config.update(
 )
 mail = Mail(app)
 
-# MongoDB Setup
+# MongoDB configuration
 mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 client = MongoClient(mongo_uri)
 db = client["medicalDB"]
 users = db["users"]
 
-# === 🔐 Auth ===
 
+# === Auth ===
 def generate_code():
     return str(np.random.randint(100000, 999999))
 
@@ -60,8 +63,18 @@ def send_verification_email(email, code):
         msg = Message("Your Verification Code", sender=gmail_user, recipients=[email])
         msg.body = f"Your verification code is: {code}"
         mail.send(msg)
+        print(f"✅ Email sent to {email} with code {code}")
     except Exception as e:
-        print(f"❌ Email sending error: {e}")
+        print(f"❌ Email sending failed: {e}")
+        raise Exception("Email sending failed. Check credentials and allow less secure apps or use App Password.")
+
+@app.route("/api/test-email", methods=["GET"])
+def test_email():
+    try:
+        send_verification_email("youremail@gmail.com", "999999")
+        return jsonify({"message": "Test email sent ✅"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/register", methods=["POST"])
 def register():
@@ -85,22 +98,34 @@ def register():
 
 @app.route("/api/login-step1", methods=["POST"])
 def login_step1():
-    data = request.get_json()
-    email, password = data.get("email"), data.get("password")
-    user = users.find_one({"email": email})
+    try:
+        data = request.get_json(force=True)
+        print("Received login data:", data)
 
-    if not user or not check_password_hash(user["password"], password):
-        return jsonify({"message": "Invalid credentials"}), 401
+        email = data.get("email")
+        password = data.get("password")
 
-    code = generate_code()
-    expiry = datetime.utcnow() + timedelta(minutes=5)
-    users.update_one({"email": email}, {"$set": {
-        "verification_code": code,
-        "code_expiry": expiry
-    }})
+        if not email or not password:
+            return jsonify({"message": "Email and password required"}), 400
 
-    send_verification_email(email, code)
-    return jsonify({"message": "Verification code sent", "step": 2}), 200
+        user = users.find_one({"email": email})
+
+        if not user or not check_password_hash(user["password"], password):
+            return jsonify({"message": "Invalid credentials"}), 401
+
+        code = generate_code()
+        expiry = datetime.utcnow() + timedelta(minutes=5)
+        users.update_one({"email": email}, {"$set": {
+            "verification_code": code,
+            "code_expiry": expiry
+        }})
+
+        send_verification_email(email, code)
+        return jsonify({"message": "Verification code sent", "step": 2}), 200
+
+    except Exception as e:
+        print("❌ Login Step 1 Error:", str(e))
+        return jsonify({"message": "Login failed", "error": str(e)}), 500
 
 @app.route("/api/login-step2", methods=["POST"])
 def login_step2():
@@ -117,20 +142,48 @@ def login_step2():
     users.update_one({"email": email}, {"$unset": {"verification_code": "", "code_expiry": ""}})
     return jsonify({"message": "Login successful", "token": "dummy_token"}), 200
 
-# === 🧠 ML Prediction ===
+# === ML Models ===
+
+def download_model_if_missing(file_id, output_path):
+    if not os.path.exists(output_path):
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        url = f"https://drive.google.com/uc?id={file_id}"
+        print(f"⬇️ Downloading {output_path}...")
+        gdown.download(url, output_path, quiet=False)
+        print(f"✅ Downloaded {output_path}")
 
 def load_models():
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    vectorizer = joblib.load(os.path.join(base_path, "models", "symptom_vectorizer.pkl"))
-    scaler = joblib.load(os.path.join(base_path, "models", "medical_scaler.pkl"))
-    logistic_model = joblib.load(os.path.join(base_path, "models", "best_medical_model_logistic_regression.pkl"))
+    base = os.path.join(os.path.dirname(__file__), "models")
+
+    # Google Drive file IDs
+    logistic_id = "1JBOrSJtfZL7kKeOqOedi1e3cYMpSt2rd"
+    ensemble_id = "15J6ieS97efmxGySE6c_9yMEbwZdMxpII"
+    scaler_id = "1aabdJ-DvGawM5vI-B9m69IuIqeNL5Re_"
+    vectorizer_id = "1lyr6Qnx3Wqr-fsWqaBQoTKra629Ac91x"
+
+    # Paths
+    logistic_path = os.path.join(base, "best_medical_model_logistic_regression.pkl")
+    ensemble_path = os.path.join(base, "ensemble_medical_model.pkl")
+    scaler_path = os.path.join(base, "medical_scaler.pkl")
+    vectorizer_path = os.path.join(base, "symptom_vectorizer.pkl")
+
+    # Download if missing
+    download_model_if_missing(logistic_id, logistic_path)
+    download_model_if_missing(ensemble_id, ensemble_path)
+    download_model_if_missing(scaler_id, scaler_path)
+    download_model_if_missing(vectorizer_id, vectorizer_path)
+
+    # Load
+    vectorizer = joblib.load(vectorizer_path)
+    scaler = joblib.load(scaler_path)
+    logistic_model = joblib.load(logistic_path)
 
     ensemble_model = None
     try:
-        ensemble_model = joblib.load(os.path.join(base_path, "models", "ensemble_medical_model.pkl"))
+        ensemble_model = joblib.load(ensemble_path)
         print("✅ Ensemble model loaded")
-    except FileNotFoundError:
-        print("ℹ️ Ensemble model not found, skipping...")
+    except Exception as e:
+        print(f"ℹ️ Ensemble model not found: {e}")
 
     return vectorizer, scaler, logistic_model, ensemble_model
 
@@ -164,7 +217,6 @@ def predict():
     try:
         data = request.get_json()
         vectorizer, scaler, logistic_model, ensemble_model = load_models()
-
         features = preprocess_input(data, vectorizer, scaler)
         if features is None:
             return jsonify({"error": "Invalid input"}), 400
@@ -197,8 +249,16 @@ def generate_treatment():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# === Start App on Render-Provided Port ===
+# ✅ MongoDB Test Endpoint
+@app.route("/api/ping-db", methods=["GET"])
+def ping_db():
+    try:
+        count = users.count_documents({})
+        return jsonify({"message": "MongoDB connected ✅", "user_count": count})
+    except Exception as e:
+        return jsonify({"error": f"MongoDB connection failed: {str(e)}"}), 500
+
+# Start app
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-
