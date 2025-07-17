@@ -1,21 +1,20 @@
 import React from 'react';
 import { Activity, HeartPulse, ArrowRight, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 function Home() {
   return (
     <div className="min-h-screen">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-transparent z-50">
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                <Activity className="w-5 h-5 text-blue-600" />
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-lg flex items-center justify-center">
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
               </div>
-              <span className="text-xl font-bold text-white">MEDICA</span>
+              <span className="text-lg sm:text-xl font-bold text-white">MEDICA</span>
             </div>
-            <div className="flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-8">
               <a href="/" className="text-white font-medium flex items-center gap-2">
                 <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
                   <Activity className="w-4 h-4 text-white" />
@@ -30,6 +29,12 @@ function Home() {
                 <Activity className="w-5 h-5" />
                 Treatment Planner
               </a>
+            </div>
+            {/* Mobile menu button - you can expand this later */}
+            <div className="md:hidden">
+              <button className="text-white p-2">
+                <Activity className="w-6 h-6" />
+              </button>
             </div>
           </div>
         </div>
@@ -46,27 +51,27 @@ function Home() {
         ></div>
 
         {/* Content Container */}
-        <div className="container mx-auto px-4 relative z-20">
+        <div className="container mx-auto px-4 sm:px-6 relative z-20">
           <div className="max-w-4xl text-center mx-auto">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2">
               MEDICA – Multimodal Engine for Diagnosis, Intervention, Care and Assistance
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 mb-6 sm:mb-8 leading-relaxed px-2 max-w-3xl mx-auto">
               MEDICA provides state-of-the-art tools for healthcare professionals and patients,
               simplifying diagnosis and treatment planning through our innovative platform.
             </p>
 
             {/* Action Buttons - Updated with icons instead of arrows */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <a href="/diagnosis">
-                <button className="group bg-green-500 hover:bg-green-600 text-white text-lg font-semibold px-8 py-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center gap-3 min-w-[200px]">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
+              <a href="/diagnosis" className="w-full sm:w-auto">
+                <button className="group bg-green-500 hover:bg-green-600 text-white text-base sm:text-lg font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center gap-3 w-full sm:min-w-[200px]">
                   <HeartPulse className="w-5 h-5" />
                   Health Diagnosis
                 </button>
               </a>
               
-              <a href="/treatment">
-                <button className="group bg-white text-blue-700 hover:bg-gray-50 text-lg font-semibold px-8 py-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center gap-3 min-w-[200px]">
+              <a href="/treatment" className="w-full sm:w-auto">
+                <button className="group bg-white text-blue-700 hover:bg-gray-50 text-base sm:text-lg font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center gap-3 w-full sm:min-w-[200px]">
                   <Activity className="w-5 h-5" />
                   Treatment Planner
                 </button>
