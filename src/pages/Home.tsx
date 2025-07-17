@@ -1,7 +1,13 @@
-import React from 'react';
-import { Activity, HeartPulse, ArrowRight, Plus } from 'lucide-react';
+import React, { useState } from 'react';
+import { Activity, HeartPulse, ArrowRight, Plus, Menu, X } from 'lucide-react';
 
 function Home() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <div className="min-h-screen">
       {/* Navigation */}
@@ -14,8 +20,10 @@ function Home() {
               </div>
               <span className="text-lg sm:text-xl font-bold text-white">MEDICA</span>
             </div>
+            
+            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
-              <a href="/" className="text-white font-medium flex items-center gap-2">
+              <a href="/" className="text-white font-medium flex items-center gap-2 hover:text-blue-200 transition-colors">
                 <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
                   <Activity className="w-4 h-4 text-white" />
                 </div>
@@ -30,13 +38,51 @@ function Home() {
                 Treatment Planner
               </a>
             </div>
-            {/* Mobile menu button - you can expand this later */}
+            
+            {/* Mobile menu button */}
             <div className="md:hidden">
-              <button className="text-white p-2">
-                <Activity className="w-6 h-6" />
+              <button 
+                onClick={toggleMobileMenu}
+                className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </div>
+          
+          {/* Mobile Navigation Menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden absolute top-full left-0 right-0 bg-blue-900/95 backdrop-blur-md border-t border-white/10">
+              <div className="px-4 py-4 space-y-3">
+                <a 
+                  href="/" 
+                  className="flex items-center gap-3 text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+                    <Activity className="w-4 h-4 text-white" />
+                  </div>
+                  Home
+                </a>
+                <a 
+                  href="/diagnosis" 
+                  className="flex items-center gap-3 text-white py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <HeartPulse className="w-5 h-5" />
+                  Health Diagnosis
+                </a>
+                <a 
+                  href="/treatment" 
+                  className="flex items-center gap-3 text-white py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Activity className="w-5 h-5" />
+                  Treatment Planner
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
