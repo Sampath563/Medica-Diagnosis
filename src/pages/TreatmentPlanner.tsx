@@ -362,6 +362,7 @@ const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
         </div>
       </div>
     </div>
+    </>
   );
 };
 
