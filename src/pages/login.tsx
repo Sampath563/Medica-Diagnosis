@@ -41,6 +41,10 @@ const Login = () => {
 
   const handleStep1 = async (e: React.FormEvent) => {
   e.preventDefault();
+  if (isLoggedIn) {
+    navigate("/home");
+    return;
+  }
   console.log("📤 Sending login-step1 request with:", {
     email: formData.email,
     password: formData.password,
@@ -76,6 +80,11 @@ const Login = () => {
 
   const handleStep2 = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+  if (isLoggedIn) {
+    navigate("/home");
+    return;
+  }
     try {
       const res = await axios.post("https://medica-backend-3.onrender.com/api/login-step2", {
         email: formData.email,
