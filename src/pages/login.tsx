@@ -56,7 +56,7 @@ const Login = () => {
       password: formData.password,
     });
 
-  if (res.data.token) {
+ if (res.data.token) {
   setMessage("✅ Already verified! Logging in...");
   localStorage.setItem("token", res.data.token);
   setIsLoggedIn(true);
@@ -64,8 +64,9 @@ const Login = () => {
 } else if (res.data.step === 2) {
   setMessage("📧 Verification code sent.");
   setTimeLeft(600);
-  setStep(2); // ✅ Move to step 2
+  setStep(2); // switch to code input
 }
+
 
 
 
