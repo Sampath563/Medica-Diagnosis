@@ -40,30 +40,30 @@ const Login = () => {
   };
 
   const handleStep1 = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("📤 Sending login-step1 request with:", {
+  e.preventDefault();
+  console.log("📤 Sending login-step1 request with:", {
+    email: formData.email,
+    password: formData.password,
+  });
+
+  try {
+    const res = await axios.post("https://medica-backend-3.onrender.com/api/login-step1", {
       email: formData.email,
       password: formData.password,
     });
 
-    try {
-      const res = await axios.post("https://medica-backend-3.onrender.com/api/login-step1", {
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (res.data.step === 2) {
-        setMessage("📧 Verification code sent to your email.");
-        setError("");
-        setStep(2);
-        setTimeLeft(600);
-      }
-    } catch (err: any) {
-      console.error("❌ login-step1 error:", err.response || err.message);
-      setError(err.response?.data?.message || "Step 1 failed.");
-      setMessage("");
+    if (res.data.step === 2) {
+      setMessage("📧 Verification code sent to your email.");
+      setError("");
+      setStep(2);
+      setTimeLeft(600);
     }
-  };
+  } catch (err: any) {
+    console.error("❌ login-step1 error:", err.response || err.message);
+    setError(err.response?.data?.message || "Step 1 failed.");
+    setMessage("");
+  }
+};
 
   const handleStep2 = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,7 +181,7 @@ const Login = () => {
                 Verify & Login
               </button>
 
-              <p style={styles.timerText}>
+              <p style={{ fontSize: "13px", color: "#fff", marginTop: "10px" }}>
                 {timeLeft > 0
                   ? `⏳ Code expires in ${formatTime(timeLeft)}`
                   : "⚠️ Code expired. Please resend."}
@@ -190,19 +190,27 @@ const Login = () => {
               <button
                 type="button"
                 onClick={handleResendCode}
-                style={styles.resendButton}
+                style={{
+                  marginTop: "10px",
+                  background: "transparent",
+                  color: "#00e5ff",
+                  border: "none",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                }}
               >
                 Resend Code
               </button>
             </form>
           )}
 
-          {message && <p style={styles.messageText}>{message}</p>}
-          {error && <p style={styles.errorText}>{error}</p>}
+          {message && <p style={{ color: "#fff", marginTop: 10 }}>{message}</p>}
 
-          <p style={styles.registerText}>
+          {error && <p style={{ color: "#f55", marginTop: 10 }}>{error}</p>}
+
+          <p style={{ textAlign: "center", marginTop: "10px", color: "#fff" }}>
             Don't have an account?{" "}
-            <a href="/register" style={styles.registerLink}>
+            <a href="/register" style={{ color: "#00e5ff" }}>
               Register here
             </a>
           </p>
@@ -212,12 +220,14 @@ const Login = () => {
   );
 };
 
+// 💡 Styles
 const styles: { [key: string]: React.CSSProperties } = {
   fullPageBackground: {
     position: "relative",
     minHeight: "100vh",
     width: "100%",
-    backgroundImage: "url('https://images.pexels.com/photos/3259629/pexels-photo-3259629.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
+    backgroundImage:
+      "url('https://images.pexels.com/photos/3259629/pexels-photo-3259629.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     display: "flex",
@@ -231,7 +241,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     left: 0,
     width: "100%",
     height: "100%",
-    background: "rgba(0, 86, 179, 0.7)",
+    background:
+      "linear-gradient(to right, rgba(0, 36, 80, 0.6), rgba(0, 85, 150, 0.5))",
     zIndex: 1,
   },
   centerContainer: {
@@ -241,181 +252,65 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
-    minHeight: "100vh",
-    padding: "1rem",
+    padding: "20px",
   },
   container: {
     width: "100%",
-    maxWidth: "400px",
-    padding: "2rem",
-    borderRadius: "20px",
-    background: "rgba(255, 255, 255, 0.15)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-    // Mobile responsive
-    '@media (max-width: 600px)': {
-      maxWidth: "90%",
-      padding: "1.5rem",
-      margin: "1rem",
-    },
-    '@media (max-width: 400px)': {
-      maxWidth: "95%",
-      padding: "1.25rem",
-      margin: "0.5rem",
-    },
+    maxWidth: "420px",
+    padding: "30px",
+    borderRadius: "16px",
+    background: "rgba(255, 255, 255, 0.25)",
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
+    boxShadow: "0 8px 20px rgba(0, 183, 255, 0.2)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
   },
   heading: {
     textAlign: "center",
-    marginBottom: "2rem",
-    fontSize: "1.75rem",
-    fontWeight: "600",
+    marginBottom: "20px",
+    fontSize: "28px",
+    fontWeight: "bold",
     color: "#fff",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    letterSpacing: "0.5px",
-    // Mobile responsive
-    '@media (max-width: 600px)': {
-      fontSize: "1.5rem",
-      marginBottom: "1.5rem",
-    },
-    '@media (max-width: 400px)': {
-      fontSize: "1.25rem",
-      marginBottom: "1.25rem",
-    },
+    fontFamily: "Segoe UI, sans-serif",
   },
   form: {
     display: "flex",
     flexDirection: "column",
-    gap: "1.25rem",
   },
   input: {
-    padding: "1rem",
+    padding: "12px",
+    marginBottom: "12px",
     borderRadius: "8px",
-    border: "2px solid rgba(0, 188, 212, 0.6)",
+    border: "1px solid rgba(0, 229, 255, 0.5)",
     outline: "none",
-    fontSize: "1rem",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    fontSize: "14px",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
     color: "#fff",
     transition: "all 0.3s ease",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    minHeight: "50px",
-    width: "100%",
-    boxSizing: "border-box",
-    // Mobile responsive
-    '@media (max-width: 600px)': {
-      padding: "0.875rem",
-      fontSize: "1rem",
-      minHeight: "48px",
-    },
-    '@media (max-width: 400px)': {
-      padding: "0.75rem",
-      fontSize: "0.95rem",
-      minHeight: "46px",
-    },
+    boxShadow: "inset 0 0 4px rgba(0,229,255,0.2)",
   },
   inputFocus: {
-    border: "2px solid #00bcd4",
-    boxShadow: "0 0 0 3px rgba(0, 188, 212, 0.2)",
+    border: "1px solid #00e5ff",
+    boxShadow: "0 0 8px #00e5ff, 0 0 16px rgba(0,229,255,0.4)",
   },
   button: {
-    padding: "1rem",
+    padding: "12px",
     background: "transparent",
     color: "#ffffff",
-    border: "2px solid #00bcd4",
+    border: "2px solid #00e5ff",
     borderRadius: "8px",
-    fontWeight: "600",
-    fontSize: "1rem",
+    fontWeight: "bold",
+    fontSize: "14px",
     letterSpacing: "0.5px",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    minHeight: "50px",
-    width: "100%",
-    boxSizing: "border-box",
-    // Mobile responsive
-    '@media (max-width: 600px)': {
-      padding: "0.875rem",
-      fontSize: "1rem",
-      minHeight: "48px",
-    },
-    '@media (max-width: 400px)': {
-      padding: "0.75rem",
-      fontSize: "0.95rem",
-      minHeight: "46px",
-    },
+    boxShadow: "0 0 8px rgba(0, 229, 255, 0.2)",
   },
   buttonHover: {
-    background: "rgba(0, 188, 212, 0.1)",
-    boxShadow: "0 0 20px rgba(0, 188, 212, 0.3)",
-    transform: "translateY(-1px)",
-  },
-  timerText: {
-    fontSize: "0.875rem",
-    color: "#fff",
-    marginTop: "0.5rem",
-    textAlign: "center",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    // Mobile responsive
-    '@media (max-width: 400px)': {
-      fontSize: "0.8rem",
-    },
-  },
-  resendButton: {
-    marginTop: "0.5rem",
-    background: "transparent",
-    color: "#00bcd4",
-    border: "none",
-    cursor: "pointer",
-    textDecoration: "underline",
-    fontSize: "0.875rem",
-    padding: "0.5rem",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    minHeight: "40px",
-    // Mobile responsive
-    '@media (max-width: 400px)': {
-      fontSize: "0.8rem",
-      minHeight: "38px",
-    },
-  },
-  messageText: {
-    color: "#fff",
-    marginTop: "1rem",
-    fontSize: "0.875rem",
-    textAlign: "center",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    // Mobile responsive
-    '@media (max-width: 400px)': {
-      fontSize: "0.8rem",
-    },
-  },
-  errorText: {
-    color: "#ff5252",
-    marginTop: "1rem",
-    fontSize: "0.875rem",
-    textAlign: "center",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    // Mobile responsive
-    '@media (max-width: 400px)': {
-      fontSize: "0.8rem",
-    },
-  },
-  registerText: {
-    textAlign: "center",
-    marginTop: "1.5rem",
-    color: "#fff",
-    fontSize: "0.875rem",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    // Mobile responsive
-    '@media (max-width: 400px)': {
-      fontSize: "0.8rem",
-      marginTop: "1.25rem",
-    },
-  },
-  registerLink: {
-    color: "#00bcd4",
-    textDecoration: "underline",
-    cursor: "pointer",
+    background:
+      "linear-gradient(90deg, rgba(0,229,255,0.1), rgba(0,172,193,0.2))",
+    boxShadow: "0 0 12px #00e5ff, 0 0 24px #00acc1",
+    transform: "scale(1.03)",
   },
 };
 
