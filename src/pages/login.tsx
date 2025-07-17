@@ -56,16 +56,13 @@ const Login = () => {
       password: formData.password,
     });
 
-    if (res.data.token) {
-  // Already verified user
-  setMessage("✅ Login successful!");
-  setIsLoggedIn(true);
+   if (res.data.token) {
+  setMessage("✅ Already verified! Logging in...");
   localStorage.setItem("token", res.data.token);
+  setIsLoggedIn(true);
   navigate("/home");
-} else if (res.data.step === 2) {
-  // First-time login, needs verification
-  setMessage("📧 Verification code sent to your email.");
-  setStep(2);
+} else {
+  setMessage("📧 New verification code sent.");
   setTimeLeft(600);
 }
 
@@ -160,18 +157,18 @@ const Login = () => {
                 }}
               />
               <button
-                type="submit"
-                style={{
-                  ...styles.button,
-                  ...(isHovering ? styles.buttonHover : {}),
-                }}
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
-              >
-                {step === 1 && message === "📧 Verification code sent to your email."
-                  ? "Resend Verification Code"
-                  : "Login"}
-              </button>
+  type="submit"
+  style={{
+    ...styles.button,
+    ...(isHovering ? styles.buttonHover : {}),
+  }}
+  onMouseEnter={() => setIsHovering(true)}
+  onMouseLeave={() => setIsHovering(false)}
+>
+  {step === 1 ? "Send Verification Code" : "Verify & Login"}
+
+</button>
+
 
             </form>
           ) : (
