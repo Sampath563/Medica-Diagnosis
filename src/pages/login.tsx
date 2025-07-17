@@ -29,6 +29,13 @@ const [requiresVerification, setRequiresVerification] = useState(true);
     }
     return () => clearInterval(interval);
   }, [timeLeft]);
+  useEffect(() => {
+  const verified = localStorage.getItem("isVerified");
+  if (verified === "true") {
+    setRequiresVerification(false);
+  }
+}, []);
+
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -62,9 +69,16 @@ const [requiresVerification, setRequiresVerification] = useState(true);
 if (res.data.token) {
   setMessage("✅ Already verified! Logging in...");
   localStorage.setItem("token", res.data.token);
+  localStorage.setItem("isVerified", "true"); // ✅ store verification
+  setRequiresVerification(false);
   setIsLoggedIn(true);
   navigate("/home");
-} else if (res.data.step === 2) {
+}
+
+
+
+
+else if (res.data.step === 2) {
   setMessage("📧 Verification code sent.");
   setTimeLeft(600);
   setStep(2); // switch to code input
@@ -81,7 +95,8 @@ if (res.data.token) {
 
   const handleStep2 = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    localStorage.setItem("isVerified", "true"); // ✅ persist verification
+
   if (isLoggedIn) {
     navigate("/home");
     return;
