@@ -163,51 +163,138 @@ function Home() {
       </section>
 
       {/* Footer Section */}
-      <footer className="bg-blue-900 text-white px-6 py-10">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-          {/* Leader Info */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Main</h2>
-            <p className="mb-1">Sampath Kumar B</p>
-            <p className="mb-1">📞 +91 8217741448</p>
-            <p className="mb-1">📧 bsampath563@gmail.com</p>
+      {/* Footer Section */}
+      <footer className="bg-gradient-to-r from-blue-900 to-blue-800 text-white px-6 py-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            {/* Leader Info */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold mb-4 text-blue-200 border-b border-blue-700 pb-2">Main</h2>
+              <div className="space-y-3">
+                <p className="font-medium text-lg">Sampath Kumar B</p>
+                <a 
+                  href="tel:+918217741448" 
+                  className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors group"
+                >
+                  <span className="group-hover:scale-110 transition-transform">📞</span>
+                  +91 8217741448
+                </a>
+                <a 
+                  href="mailto:bsampath563@gmail.com" 
+                  className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors group"
+                >
+                  <span className="group-hover:scale-110 transition-transform">📧</span>
+                  bsampath563@gmail.com
+                </a>
+              </div>
+            </div>
+
+            {/* Team Members */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold mb-4 text-blue-200 border-b border-blue-700 pb-2">Team Members</h2>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-2 hover:text-blue-200 transition-colors">
+                  <span className="text-yellow-400">💡</span>
+                  <span>Pruthvi Rag N M</span>
+                </li>
+                <li className="flex items-center gap-2 hover:text-blue-200 transition-colors">
+                  <span className="text-yellow-400">💡</span>
+                  <span>Varun B M</span>
+                </li>
+                <li className="flex items-center gap-2 hover:text-blue-200 transition-colors">
+                  <span className="text-yellow-400">💡</span>
+                  <span>Vivek Chandra</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Quick Links */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold mb-4 text-blue-200 border-b border-blue-700 pb-2">Quick Links</h2>
+              <ul className="space-y-3">
+                <li>
+                  <button 
+                    onClick={() => handleNavigate('/home')} 
+                    className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors group w-full text-left"
+                  >
+                    <span className="group-hover:scale-110 transition-transform">🏠</span>
+                    Home
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => handleNavigate('/diagnosis')} 
+                    className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors group w-full text-left"
+                  >
+                    <span className="group-hover:scale-110 transition-transform">🩺</span>
+                    Health Diagnosis
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => handleNavigate('/treatment')} 
+                    className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors group w-full text-left"
+                  >
+                    <span className="group-hover:scale-110 transition-transform">💊</span>
+                    Treatment Planner
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact & Feedback */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold mb-4 text-blue-200 border-b border-blue-700 pb-2">Get in Touch</h2>
+              <div className="space-y-3">
+                <p className="text-blue-200">We value your feedback!</p>
+                <a
+                  href="mailto:sampath.medica@gmail.com?subject=MEDICA%20Feedback&body=Hello%20MEDICA%20Team,%0D%0A%0D%0AI%20would%20like%20to%20share%20my%20feedback:"
+                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-colors group"
+                >
+                  <span className="group-hover:scale-110 transition-transform">💬</span>
+                  Send Feedback
+                </a>
+                <div className="pt-2">
+                  <p className="text-sm text-blue-300 mb-2">Connect with us:</p>
+                  <div className="flex gap-3">
+                    <a
+                      href="mailto:sampath.medica@gmail.com"
+                      className="text-blue-300 hover:text-white transition-colors"
+                      title="Email us"
+                    >
+                      <span className="text-xl hover:scale-110 transition-transform inline-block">📧</span>
+                    </a>
+                    <a
+                      href="tel:+918217741448"
+                      className="text-blue-300 hover:text-white transition-colors"
+                      title="Call us"
+                    >
+                      <span className="text-xl hover:scale-110 transition-transform inline-block">📞</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Team Members */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Team Members</h2>
-            <ul className="space-y-1">
-              <li>💡 Pruthvi Rag N M</li>
-              <li>💡 Varun B M</li>
-              <li>💡 Vivek Chandra</li>
-            </ul>
+          {/* Bottom Bar */}
+          <div className="border-t border-blue-700 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="text-center md:text-left">
+                <p className="text-sm text-blue-200">
+                  &copy; {new Date().getFullYear()} MEDICA - Multimodal Engine for Diagnosis, Intervention, Care and Assistance
+                </p>
+                <p className="text-xs text-blue-300 mt-1">
+                  All rights reserved. Empowering healthcare through innovation.
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-blue-300">Made with</span>
+                <span className="text-red-400 animate-pulse">❤️</span>
+                <span className="text-sm text-blue-300">for better healthcare</span>
+              </div>
+            </div>
           </div>
-
-          {/* Quick Links */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Quick Links</h2>
-            <ul className="space-y-1">
-              <li><button onClick={() => handleNavigate('/home')} className="hover:underline">🏠 Home</button></li>
-              <li><button onClick={() => handleNavigate('/diagnosis')} className="hover:underline">🩺 Diagnosis</button></li>
-              <li><button onClick={() => handleNavigate('/treatment')} className="hover:underline">💊 Treatment</button></li>
-            </ul>
-          </div>
-
-          {/* Feedback */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Feedback</h2>
-            <p className="mb-2">We value your thoughts!</p>
-            <a
-              href="mailto:sampath.medica@gmail.com?subject=MEDICA Feedback"
-              className="text-blue-300 hover:underline"
-            >
-              Send Feedback 💬
-            </a>
-          </div>
-        </div>
-
-        <div className="text-center mt-10 text-sm text-blue-200">
-          &copy; {new Date().getFullYear()} MEDICA. All rights reserved.
         </div>
       </footer>
     </div>
