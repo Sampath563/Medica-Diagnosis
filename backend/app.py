@@ -1,6 +1,6 @@
 import os
-import joblib
 import numpy as np
+import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_mail import Mail, Message
@@ -10,7 +10,6 @@ from pathlib import Path
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 from serpapi_util import fetch_search_results
-import gdown
 
 # === Load Environment Variables ===
 env_path = Path(__file__).parent / '.env'
@@ -19,9 +18,15 @@ load_dotenv(dotenv_path=env_path)
 # === Flask Setup ===
 app = Flask(__name__)
 
-# ✅ Enable CORS for all /api/* and /predict routes
-# Allow Netlify frontend
-CORS(app, origins=["https://dynamic-sunburst-5f73a6.netlify.app"], supports_credentials=True)
+# ✅ Enable CORS for Netlify frontend
+CORS(app, resources={r"/.*": {"origins": "https://dynamic-sunburst-5f73a6.netlify.app"}},
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization"])
+
+@app.after_request
+def after_request(response):
+    print("🔍 Response headers:", response.headers)
+    return response
 
 @app.before_request
 def log_request_info():
@@ -42,16 +47,25 @@ app.config.update(
 mail = Mail(app)
 
 # === MongoDB Setup ===
-mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
-client = MongoClient(
-    mongo_uri,
-    tls=True,
-    tlsAllowInvalidCertificates=True,  # <-- add this only temporarily if needed
-    serverSelectionTimeoutMS=5000
-)
+mongo_uri = os.getenv("MONGO_URI")
+print("🔗 Connecting to MongoDB:", mongo_uri)
 
-db = client["medicalDB"]
-users = db["users"]
+try:
+    client = MongoClient(mongo_uri)
+    db = client["medicalDB"]
+    users = db["users"]
+    users.count_documents({})  # test query
+    print("✅ MongoDB connected and users collection loaded")
+except Exception as e:
+    print(f"❌ MongoDB collection access failed: {e}")
+    users = None
+
+@app.route("/api/debug", methods=["GET"])
+def debug_info():
+    return jsonify({
+        "mongo_uri_loaded": mongo_uri is not None,
+        "users_collection_connected": users is not None
+    })
 
 # === Email Auth ===
 def generate_code():
@@ -82,6 +96,8 @@ def register():
         email = data.get("email")
         password = data.get("password")
 
+        print(f"📅 Received registration request: email={email}")
+
         if not email or not password:
             return jsonify({"message": "Missing email or password"}), 400
 
@@ -92,148 +108,66 @@ def register():
         users.insert_one({"email": email, "password": hashed_password})
         return jsonify({"message": "Registration successful"}), 201
     except Exception as e:
+        print(f"🔥 Exception in /api/register: {e}")
         return jsonify({"message": "Registration failed", "error": str(e)}), 500
 
 @app.route("/api/login-step1", methods=["POST"])
 def login_step1():
     try:
-        print("🚨 login-step1 triggered")
-
         data = request.get_json(force=True)
-        print("📥 Received data:", data)
-
         email = data.get("email")
         password = data.get("password")
 
         if not email or not password:
-            print("⚠️ Missing email or password")
             return jsonify({"message": "Email and password required"}), 400
 
         user = users.find_one({"email": email})
-        print("👤 User found in DB:", user)
-
-        if not user:
-            print("❌ User not found")
-            return jsonify({"message": "Invalid credentials"}), 401
-
-        if not check_password_hash(user["password"], password):
-            print("❌ Password mismatch")
+        if not user or not check_password_hash(user["password"], password):
             return jsonify({"message": "Invalid credentials"}), 401
 
         code = generate_code()
         expiry = datetime.utcnow() + timedelta(minutes=5)
 
-        print("🔐 Generated code:", code)
         users.update_one({"email": email}, {"$set": {
             "verification_code": code,
             "code_expiry": expiry
         }})
 
         send_verification_email(email, code)
-        print("✅ Email sent")
-
         return jsonify({"message": "Verification code sent", "step": 2}), 200
     except Exception as e:
-        print("🔥 Exception occurred:", e)
+        print("🔥 Exception occurred in login-step1:", e)
         return jsonify({"message": "Login failed", "error": str(e)}), 500
-
 
 @app.route("/api/login-step2", methods=["POST"])
 def login_step2():
-    data = request.get_json()
-    email, code = data.get("email"), data.get("code")
-    user = users.find_one({"email": email})
-
-    if not user or user.get("verification_code") != code:
-        return jsonify({"message": "Invalid verification code"}), 401
-
-    if datetime.utcnow() > user.get("code_expiry"):
-        return jsonify({"message": "Code expired"}), 401
-
-    users.update_one({"email": email}, {"$unset": {"verification_code": "", "code_expiry": ""}})
-    return jsonify({"message": "Login successful", "token": "dummy_token"}), 200
-
-# === Model Utilities ===
-def download_model_if_missing(file_id, output_path):
-    if not os.path.exists(output_path):
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        url = f"https://drive.google.com/uc?id={file_id}"
-        print(f"⬇️ Downloading {output_path}...")
-        gdown.download(url, output_path, quiet=False)
-        print(f"✅ Downloaded {output_path}")
-
-def load_models():
-    base = os.path.join(os.path.dirname(__file__), "models")
-    paths = {
-        "logistic": ("1JBOrSJtfZL7kKeOqOedi1e3cYMpSt2rd", os.path.join(base, "best_medical_model_logistic_regression.pkl")),
-        "ensemble": ("15J6ieS97efmxGySE6c_9yMEbwZdMxpII", os.path.join(base, "ensemble_medical_model.pkl")),
-        "scaler": ("1aabdJ-DvGawM5vI-B9m69IuIqeNL5Re_", os.path.join(base, "medical_scaler.pkl")),
-        "vectorizer": ("1lyr6Qnx3Wqr-fsWqaBQoTKra629Ac91x", os.path.join(base, "symptom_vectorizer.pkl")),
-    }
-
-    for file_id, path in paths.values():
-        download_model_if_missing(file_id, path)
-
     try:
-        vectorizer = joblib.load(paths["vectorizer"][1])
-        scaler = joblib.load(paths["scaler"][1])
-        logistic_model = joblib.load(paths["logistic"][1])
-        ensemble_model = joblib.load(paths["ensemble"][1])
-        return vectorizer, scaler, logistic_model, ensemble_model
+        data = request.get_json()
+        email, code = data.get("email"), data.get("code")
+        user = users.find_one({"email": email})
+
+        if not user or user.get("verification_code") != code:
+            return jsonify({"message": "Invalid verification code"}), 401
+
+        if datetime.utcnow() > user.get("code_expiry"):
+            return jsonify({"message": "Code expired"}), 401
+
+        users.update_one({"email": email}, {"$unset": {"verification_code": "", "code_expiry": ""}})
+        return jsonify({"message": "Login successful", "token": "dummy_token"}), 200
     except Exception as e:
-        print(f"❌ Model loading error: {e}")
-        raise
+        print("🔥 Exception in login-step2:", e)
+        return jsonify({"message": "Login failed", "error": str(e)}), 500
 
-def preprocess_input(data, vectorizer, scaler):
-    try:
-        symptoms = data.get("symptoms", "")
-        bp = data.get("blood_pressure", "0/0")
-        try:
-            sys, dia = map(int, bp.split("/"))
-            bp_avg = (sys + dia) / 2
-        except:
-            bp_avg = 0
-
-        vitals = [
-            bp_avg,
-            float(data.get("heart_rate", 0)),
-            float(data.get("age", 0)),
-            float(data.get("temperature", 0)),
-            float(data.get("oxygen_saturation", 0))
-        ]
-
-        symptom_vec = vectorizer.transform([symptoms])
-        vital_vec = scaler.transform([vitals])
-        return np.hstack([symptom_vec.toarray(), vital_vec])
-    except Exception as e:
-        print(f"❌ Preprocessing error: {e}")
-        return None
-
+# === PROXY PREDICTION TO HUGGING FACE ===
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
         data = request.get_json()
-        print("🔍 Predict Request:", data)
-
-        vectorizer, scaler, logistic_model, ensemble_model = load_models()
-        features = preprocess_input(data, vectorizer, scaler)
-        if features is None:
-            return jsonify({"error": "Invalid input"}), 400
-
-        predictions = {}
-        if logistic_model:
-            pred = logistic_model.predict(features)[0]
-            prob = np.max(logistic_model.predict_proba(features))
-            predictions["logistic"] = {"prediction": pred, "confidence": float(prob)}
-
-        if ensemble_model:
-            pred = ensemble_model.predict(features)[0]
-            prob = np.max(ensemble_model.predict_proba(features))
-            predictions["ensemble"] = {"prediction": pred, "confidence": float(prob)}
-
-        return jsonify({"result": predictions})
+        hf_url = "https://sampath563-medica-backend.hf.space/predict"
+        response = requests.post(hf_url, json=data)
+        return jsonify(response.json()), response.status_code
     except Exception as e:
-        print(f"❌ Prediction error: {e}")
+        print(f"❌ Proxy prediction error: {e}")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/treatment", methods=["POST"])

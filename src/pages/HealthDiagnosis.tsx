@@ -111,8 +111,12 @@ const navigate = useNavigate();
       [name]: value
     }));
   };
+const handleSubmit = async () => {
+  setLoading(true);
+  setError(null);
+  setSymptomsError(null);
+  setPrediction(null);
 
-  const handleSubmit = async () => {
   // Validate symptoms
   const allowedSymptoms = [
     "abdominal pain", "back pain", "balance problems", "bloating", "blurred vision", "body pain",
@@ -130,10 +134,18 @@ const navigate = useNavigate();
     "weight loss", "wheezing"
   ];
 
-  setLoading(true);
-  setError(null);
-  setSymptomsError(null);
-  setPrediction(null);
+  const inputSymptoms = formData.symptoms
+    .split(',')
+    .map(symptom => symptom.trim().toLowerCase())
+    .filter(s => s !== '');
+
+  const invalidSymptoms = inputSymptoms.filter(symptom => !allowedSymptoms.includes(symptom));
+
+  if (invalidSymptoms.length > 0) {
+    setSymptomsError(`Invalid symptom(s): ${invalidSymptoms.join(', ')}`);
+    setLoading(false);
+    return;
+  }
 
   try {
     const backendBaseUrl = import.meta.env.VITE_BACKEND_URL;
@@ -175,6 +187,7 @@ const navigate = useNavigate();
     setLoading(false);
   }
 };
+
 
 
   const resetForm = () => {
