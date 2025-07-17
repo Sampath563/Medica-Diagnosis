@@ -56,14 +56,15 @@ const Login = () => {
       password: formData.password,
     });
 
-   if (res.data.token) {
+  if (res.data.token) {
   setMessage("✅ Already verified! Logging in...");
   localStorage.setItem("token", res.data.token);
   setIsLoggedIn(true);
   navigate("/home");
-} else {
-  setMessage("📧 New verification code sent.");
+} else if (res.data.step === 2) {
+  setMessage("📧 Verification code sent.");
   setTimeLeft(600);
+  setStep(2); // ✅ Move to step 2
 }
 
 
@@ -100,19 +101,21 @@ const Login = () => {
   };
 
   const handleResendCode = async () => {
-    try {
-      await axios.post("https://medica-backend-3.onrender.com/api/login-step1", {
-        email: formData.email,
-        password: formData.password,
-      });
-      setMessage("📧 New verification code sent.");
-      setError("");
-      setTimeLeft(600);
-    } catch (err: any) {
-      setError("Could not resend code.");
-      setMessage("");
-    }
-  };
+  try {
+    await axios.post("https://medica-backend-3.onrender.com/api/login-step1", {
+      email: formData.email,
+      password: formData.password,
+    });
+    setMessage("📧 New verification code sent.");
+    setError("");
+    setTimeLeft(600);
+    setStep(2); // ✅ Ensure it stays on Step 2
+  } catch (err: any) {
+    setError("Could not resend code.");
+    setMessage("");
+  }
+};
+
 
   if (isLoggedIn) {
     return <Navigate to="/home" />;
