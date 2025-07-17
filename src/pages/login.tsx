@@ -198,7 +198,6 @@ const Login = () => {
           )}
 
           {message && <p style={styles.messageText}>{message}</p>}
-
           {error && <p style={styles.errorText}>{error}</p>}
 
           <p style={styles.registerText}>
@@ -213,14 +212,12 @@ const Login = () => {
   );
 };
 
-// 💡 Responsive Styles
 const styles: { [key: string]: React.CSSProperties } = {
   fullPageBackground: {
     position: "relative",
     minHeight: "100vh",
     width: "100%",
-    backgroundImage:
-      "url('https://images.pexels.com/photos/3259629/pexels-photo-3259629.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
+    backgroundImage: "url('https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1889&q=80')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     display: "flex",
@@ -234,8 +231,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     left: 0,
     width: "100%",
     height: "100%",
-    background:
-      "linear-gradient(to right, rgba(0, 36, 80, 0.6), rgba(0, 85, 150, 0.5))",
+    background: "rgba(0, 86, 179, 0.7)",
     zIndex: 1,
   },
   centerContainer: {
@@ -245,122 +241,179 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
-    padding: "1rem",
     minHeight: "100vh",
+    padding: "1rem",
   },
   container: {
     width: "100%",
-    maxWidth: "420px",
-    padding: "clamp(1.5rem, 5vw, 2rem)",
-    borderRadius: "16px",
-    background: "rgba(255, 255, 255, 0.25)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
-    boxShadow: "0 8px 20px rgba(0, 183, 255, 0.2)",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
-    margin: "1rem",
-    // Mobile-specific adjustments
-    '@media (max-width: 480px)': {
-      maxWidth: "100%",
-      margin: "0.5rem",
+    maxWidth: "400px",
+    padding: "2rem",
+    borderRadius: "20px",
+    background: "rgba(255, 255, 255, 0.15)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    // Mobile responsive
+    '@media (max-width: 600px)': {
+      maxWidth: "90%",
       padding: "1.5rem",
+      margin: "1rem",
+    },
+    '@media (max-width: 400px)': {
+      maxWidth: "95%",
+      padding: "1.25rem",
+      margin: "0.5rem",
     },
   },
   heading: {
     textAlign: "center",
-    marginBottom: "1.5rem",
-    fontSize: "clamp(1.5rem, 5vw, 1.75rem)",
-    fontWeight: "bold",
+    marginBottom: "2rem",
+    fontSize: "1.75rem",
+    fontWeight: "600",
     color: "#fff",
-    fontFamily: "Segoe UI, sans-serif",
-    lineHeight: "1.2",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    letterSpacing: "0.5px",
+    // Mobile responsive
+    '@media (max-width: 600px)': {
+      fontSize: "1.5rem",
+      marginBottom: "1.5rem",
+    },
+    '@media (max-width: 400px)': {
+      fontSize: "1.25rem",
+      marginBottom: "1.25rem",
+    },
   },
   form: {
     display: "flex",
     flexDirection: "column",
-    gap: "1rem",
+    gap: "1.25rem",
   },
   input: {
-    padding: "clamp(0.75rem, 3vw, 1rem)",
+    padding: "1rem",
     borderRadius: "8px",
-    border: "1px solid rgba(0, 229, 255, 0.5)",
+    border: "2px solid rgba(0, 188, 212, 0.6)",
     outline: "none",
-    fontSize: "clamp(0.875rem, 3vw, 1rem)",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    fontSize: "1rem",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     color: "#fff",
     transition: "all 0.3s ease",
-    boxShadow: "inset 0 0 4px rgba(0,229,255,0.2)",
-    minHeight: "44px", // Minimum touch target size
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    minHeight: "50px",
     width: "100%",
     boxSizing: "border-box",
+    // Mobile responsive
+    '@media (max-width: 600px)': {
+      padding: "0.875rem",
+      fontSize: "1rem",
+      minHeight: "48px",
+    },
+    '@media (max-width: 400px)': {
+      padding: "0.75rem",
+      fontSize: "0.95rem",
+      minHeight: "46px",
+    },
   },
   inputFocus: {
-    border: "1px solid #00e5ff",
-    boxShadow: "0 0 8px #00e5ff, 0 0 16px rgba(0,229,255,0.4)",
+    border: "2px solid #00bcd4",
+    boxShadow: "0 0 0 3px rgba(0, 188, 212, 0.2)",
   },
   button: {
-    padding: "clamp(0.75rem, 3vw, 1rem)",
+    padding: "1rem",
     background: "transparent",
     color: "#ffffff",
-    border: "2px solid #00e5ff",
+    border: "2px solid #00bcd4",
     borderRadius: "8px",
-    fontWeight: "bold",
-    fontSize: "clamp(0.875rem, 3vw, 1rem)",
+    fontWeight: "600",
+    fontSize: "1rem",
     letterSpacing: "0.5px",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0 0 8px rgba(0, 229, 255, 0.2)",
-    minHeight: "44px", // Minimum touch target size
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    minHeight: "50px",
     width: "100%",
     boxSizing: "border-box",
+    // Mobile responsive
+    '@media (max-width: 600px)': {
+      padding: "0.875rem",
+      fontSize: "1rem",
+      minHeight: "48px",
+    },
+    '@media (max-width: 400px)': {
+      padding: "0.75rem",
+      fontSize: "0.95rem",
+      minHeight: "46px",
+    },
   },
   buttonHover: {
-    background:
-      "linear-gradient(90deg, rgba(0,229,255,0.1), rgba(0,172,193,0.2))",
-    boxShadow: "0 0 12px #00e5ff, 0 0 24px #00acc1",
-    transform: "scale(1.02)", // Reduced scale for mobile
+    background: "rgba(0, 188, 212, 0.1)",
+    boxShadow: "0 0 20px rgba(0, 188, 212, 0.3)",
+    transform: "translateY(-1px)",
   },
   timerText: {
-    fontSize: "clamp(0.8rem, 3vw, 0.875rem)",
+    fontSize: "0.875rem",
     color: "#fff",
     marginTop: "0.5rem",
     textAlign: "center",
-    lineHeight: "1.4",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    // Mobile responsive
+    '@media (max-width: 400px)': {
+      fontSize: "0.8rem",
+    },
   },
   resendButton: {
     marginTop: "0.5rem",
     background: "transparent",
-    color: "#00e5ff",
+    color: "#00bcd4",
     border: "none",
     cursor: "pointer",
     textDecoration: "underline",
-    fontSize: "clamp(0.875rem, 3vw, 1rem)",
+    fontSize: "0.875rem",
     padding: "0.5rem",
-    minHeight: "44px", // Minimum touch target size
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    minHeight: "40px",
+    // Mobile responsive
+    '@media (max-width: 400px)': {
+      fontSize: "0.8rem",
+      minHeight: "38px",
+    },
   },
   messageText: {
     color: "#fff",
     marginTop: "1rem",
-    fontSize: "clamp(0.875rem, 3vw, 1rem)",
+    fontSize: "0.875rem",
     textAlign: "center",
-    lineHeight: "1.4",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    // Mobile responsive
+    '@media (max-width: 400px)': {
+      fontSize: "0.8rem",
+    },
   },
   errorText: {
-    color: "#ff5555",
+    color: "#ff5252",
     marginTop: "1rem",
-    fontSize: "clamp(0.875rem, 3vw, 1rem)",
+    fontSize: "0.875rem",
     textAlign: "center",
-    lineHeight: "1.4",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    // Mobile responsive
+    '@media (max-width: 400px)': {
+      fontSize: "0.8rem",
+    },
   },
   registerText: {
     textAlign: "center",
-    marginTop: "1rem",
+    marginTop: "1.5rem",
     color: "#fff",
-    fontSize: "clamp(0.875rem, 3vw, 1rem)",
-    lineHeight: "1.4",
+    fontSize: "0.875rem",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    // Mobile responsive
+    '@media (max-width: 400px)': {
+      fontSize: "0.8rem",
+      marginTop: "1.25rem",
+    },
   },
   registerLink: {
-    color: "#00e5ff",
+    color: "#00bcd4",
     textDecoration: "underline",
     cursor: "pointer",
   },
