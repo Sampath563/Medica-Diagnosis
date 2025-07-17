@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Activity, HeartPulse, Menu, X } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 const FullNavigationBar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -12,7 +13,9 @@ const FullNavigationBar: React.FC = () => {
 
   const handleNavClick = (path: string) => {
     setIsMobileMenuOpen(false);
-    navigate(path);
+    if (location.pathname !== path) {
+      navigate(path);
+    }
   };
 
   return (
@@ -24,23 +27,22 @@ const FullNavigationBar: React.FC = () => {
             <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <Link to="/home" className="text-lg sm:text-xl font-bold text-black no-underline">
+            <Link to="/home" className="text-lg sm:text-xl font-bold text-blue-500 no-underline">
               MEDICA
             </Link>
           </div>
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-8">
-            <Link
-              to="/home"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-black font-medium flex items-center gap-2 hover:text-blue-600 transition-colors"
+            <button
+              onClick={() => handleNavClick('/home')}
+              className="text-black font-medium flex items-center gap-2 hover:text-blue-600 transition-colors bg-transparent border-none cursor-pointer"
             >
               <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
                 <Activity className="w-4 h-4 text-white" />
               </div>
               Home
-            </Link>
+            </button>
             <button
               onClick={() => handleNavClick('/diagnosis')}
               className="text-black hover:text-blue-600 transition-colors flex items-center gap-2 bg-transparent border-none cursor-pointer"
@@ -75,26 +77,25 @@ const FullNavigationBar: React.FC = () => {
           }`}
         >
           <div className="px-4 py-4 space-y-3">
-            <Link
-              to="/home"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 text-black font-medium py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors"
+            <button
+              onClick={() => handleNavClick('/home')}
+              className="flex items-center gap-3 text-black font-medium py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors w-full text-left"
             >
               <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
                 <Activity className="w-4 h-4 text-white" />
               </div>
               Home
-            </Link>
-            <button
+            </button>
+            <button 
               onClick={() => handleNavClick('/diagnosis')}
-              className="flex items-center gap-3 text-black py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors bg-transparent border-none cursor-pointer"
+              className="flex items-center gap-3 text-black py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors bg-transparent border-none cursor-pointer w-full text-left"
             >
               <HeartPulse className="w-5 h-5 text-green-600" />
               Health Diagnosis
             </button>
             <button
               onClick={() => handleNavClick('/treatment')}
-              className="flex items-center gap-3 text-black py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors bg-transparent border-none cursor-pointer"
+              className="flex items-center gap-3 text-black py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors bg-transparent border-none cursor-pointer w-full text-left"
             >
               <Activity className="w-5 h-5 text-blue-600" />
               Treatment Planner
