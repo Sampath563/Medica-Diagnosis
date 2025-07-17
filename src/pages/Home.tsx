@@ -161,11 +161,12 @@ function Home() {
           </div>
         </div>
       </section>
-      
+
       {/* Footer Section */}
-<footer className="bg-blue-900 text-white px-6 py-10 mt-12">
-  <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
-    {/* Leader Info */}
+      <footer className="bg-transparent text-white px-6 py-12 mt-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+            {/* Leader Info */}
             <div className="space-y-4">
               <h2 className="text-xl font-semibold mb-4 text-blue-200 border-b border-blue-700 pb-2">Main</h2>
               <div className="space-y-3">
@@ -193,7 +194,7 @@ function Home() {
               <ul className="space-y-3">
                 <li className="flex items-center gap-2 hover:text-blue-200 transition-colors">
                   <span className="text-yellow-400">💡</span>
-                  <span>Pruthvi Rag N M</span>
+                  <span>Pruthvi Raj N M</span>
                 </li>
                 <li className="flex items-center gap-2 hover:text-blue-200 transition-colors">
                   <span className="text-yellow-400">💡</span>
@@ -205,7 +206,8 @@ function Home() {
                 </li>
               </ul>
             </div>
-     {/* Quick Links */}
+
+            {/* Quick Links */}
             <div className="space-y-4">
               <h2 className="text-xl font-semibold mb-4 text-blue-200 border-b border-blue-700 pb-2">Quick Links</h2>
               <ul className="space-y-3">
@@ -239,69 +241,71 @@ function Home() {
               </ul>
             </div>
 
-    {/* Feedback Form */}
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Send us Feedback</h2>
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          const form = e.target as HTMLFormElement;
-          const formData = new FormData(form);
-          const payload = {
-            name: formData.get('name'),
-            email: formData.get('email'),
-            message: formData.get('message'),
-          };
+            {/* Feedback Form */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold mb-4 text-blue-200 border-b border-blue-700 pb-2">Send us Feedback</h2>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.target as HTMLFormElement;
+                  const formData = new FormData(form);
+                  const payload = {
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    message: formData.get('message'),
+                  };
 
-          try {
-            const res = await fetch("https://medica-backend-3.onrender.com/api/feedback", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload),
-            });
-            const data = await res.json();
-            if (data.success) {
-              alert("Thank you for your feedback!");
-              form.reset();
-            } else {
-              alert("Error: " + data.error);
-            }
-          } catch (err) {
-            alert("Failed to submit feedback");
-          }
-        }}
-        className="space-y-4"
-      >
-        <input
-          type="text"
-          name="name"
-          required
-          placeholder="Your Name"
-          className="w-full p-2 rounded bg-white text-black"
-        />
-        <input
-          type="email"
-          name="email"
-          required
-          placeholder="Your Email"
-          className="w-full p-2 rounded bg-white text-black"
-        />
-        <textarea
-          name="message"
-          required
-          rows={4}
-          placeholder="Your Feedback"
-          className="w-full p-2 rounded bg-white text-black"
-        />
-        <button
-          type="submit"
-          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-        >
-          Submit
-        </button>
-      </form>
-    </div>
-    {/* Bottom Bar */}
+                  try {
+                    const res = await fetch("https://medica-backend-3.onrender.com/api/feedback", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(payload),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      alert("Thank you for your feedback!");
+                      form.reset();
+                    } else {
+                      alert("Error: " + data.error);
+                    }
+                  } catch (err) {
+                    alert("Failed to submit feedback");
+                  }
+                }}
+                className="space-y-3"
+              >
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  placeholder="Your Name"
+                  className="w-full p-2 rounded bg-white/90 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="Your Email"
+                  className="w-full p-2 rounded bg-white/90 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <textarea
+                  name="message"
+                  required
+                  rows={3}
+                  placeholder="Your Feedback"
+                  className="w-full p-2 rounded bg-white/90 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors font-medium"
+                >
+                  Submit Feedback
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
           <div className="border-t border-blue-700 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="text-center md:text-left">
@@ -319,8 +323,8 @@ function Home() {
               </div>
             </div>
           </div>
-  </div>
-</footer>
+        </div>
+      </footer>
     </div>
   );
 }
