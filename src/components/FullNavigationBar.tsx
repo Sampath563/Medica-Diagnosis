@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, HeartPulse, Menu, X } from 'lucide-react';
+import { Activity, HeartPulse, Menu, X, LogOut } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 const FullNavigationBar: React.FC = () => {
@@ -16,6 +16,11 @@ const FullNavigationBar: React.FC = () => {
     if (location.pathname !== path) {
       navigate(path);
     }
+  };
+
+  const handleSignOut = () => {
+    localStorage.clear();
+    navigate('/login');
   };
 
   return (
@@ -56,6 +61,13 @@ const FullNavigationBar: React.FC = () => {
             >
               <Activity className="w-5 h-5" />
               Treatment Planner
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <LogOut className="w-5 h-5" />
+              Sign Out
             </button>
           </div>
 
@@ -99,6 +111,13 @@ const FullNavigationBar: React.FC = () => {
             >
               <Activity className="w-5 h-5 text-blue-600" />
               Treatment Planner
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-3 text-red-600 py-3 px-4 rounded-lg hover:bg-red-100 transition-colors w-full text-left"
+            >
+              <LogOut className="w-5 h-5" />
+              Sign Out
             </button>
           </div>
         </div>
