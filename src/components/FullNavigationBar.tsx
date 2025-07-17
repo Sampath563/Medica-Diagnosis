@@ -24,7 +24,9 @@ const FullNavigationBar: React.FC = () => {
             <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <span className="text-lg sm:text-xl font-bold text-black">MEDICA</span>
+            <Link to="/home" className="text-lg sm:text-xl font-bold text-black no-underline">
+              MEDICA
+            </Link>
           </div>
 
           {/* Desktop nav */}
