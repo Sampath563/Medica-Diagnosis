@@ -12,6 +12,10 @@ import traceback
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 from serpapi_util import fetch_search_results
+from flask import Flask, request, jsonify
+from pymongo import MongoClient
+from flask_cors import CORS
+
 
 # === Load Environment Variables ===
 env_path = Path(__file__).parent / '.env'
@@ -23,6 +27,34 @@ app = Flask(__name__)
 # === Enable CORS for frontend ===
 CORS(app, resources={r"/.*": {"origins": "https://dynamic-sunburst-5f73a6.netlify.app"}}, supports_credentials=True)
 
+
+client = MongoClient("mongodb+srv://bsampath563:your_password@cluster3.d62mpwa.mongodb.net/")
+db = client["medica"]  # Replace with your actual DB name
+feedback_collection = db["feedbacks"]  
+
+@app.route('/api/feedback', methods=['POST'])
+def submit_feedback():
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        email = data.get('email')
+        message = data.get('message')
+
+        if not name or not email or not message:
+            return jsonify({"success": False, "error": "Missing fields"}), 400
+
+        feedback_collection.insert_one({
+            "name": name,
+            "email": email,
+            "message": message
+        })
+
+        return jsonify({"success": True, "message": "Feedback received"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    
+    
 @app.after_request
 def after_request(response):
     return response
@@ -185,6 +217,29 @@ def ping_db():
         return jsonify({"message": "MongoDB connected ✅", "user_count": count})
     except Exception as e:
         return jsonify({"error": f"MongoDB connection failed: {str(e)}"}), 500
+
+@app.route('/api/feedback', methods=['POST'])
+def store_feedback():
+    data = request.json
+    name = data.get('name')
+    email = data.get('email')
+    message = data.get('message')
+    
+    if not name or not email or not message:
+        return jsonify({'error': 'Missing fields'}), 400
+
+    feedback_data = {
+        'name': name,
+        'email': email,
+        'message': message,
+        'timestamp': datetime.now()
+    }
+    
+    try:
+        db.feedback.insert_one(feedback_data)
+        return jsonify({'success': True, 'message': 'Feedback submitted successfully'})
+    except Exception as e:
+        return jsonify({'error': 'Failed to store feedback', 'details': str(e)}), 500
 
 # === Main Entrypoint ===
 if __name__ == '__main__':
