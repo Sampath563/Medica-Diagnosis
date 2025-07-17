@@ -227,7 +227,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     minHeight: "100vh",
     width: "100%",
     backgroundImage:
-      "url('https://images.pexels.com/photos/3259629/pexels-photo-3259629.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
+      "url('https://drive.google.com/file/d/1MZKuNij9EZREpWqcu-4bT9i2pbejamun/view?usp=drivesdk')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     display: "flex",
