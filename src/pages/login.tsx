@@ -93,10 +93,12 @@ if (res.data.token) {
       });
 
       setMessage("✅ Login successful!");
-      setError("");
-      localStorage.setItem("token", res.data.token);
-      setIsLoggedIn(true);
-      navigate("/home");
+setError("");
+localStorage.setItem("token", res.data.token);
+setIsLoggedIn(true);
+setRequiresVerification(false); // ✅ Add this line
+navigate("/home");
+
     } catch (err: any) {
       setError(err.response?.data?.message || "Verification failed.");
       setMessage("");
@@ -104,6 +106,7 @@ if (res.data.token) {
   };
 
   const handleResendCode = async () => {
+    if (!requiresVerification) return;
   try {
     await axios.post("https://medica-backend-3.onrender.com/api/login-step1", {
       email: formData.email,
@@ -171,7 +174,13 @@ if (res.data.token) {
   onMouseEnter={() => setIsHovering(true)}
   onMouseLeave={() => setIsHovering(false)}
 >
-  {step === 1 ? (requiresVerification ? "Send Verification Code" : "Login") : "Verify & Login"}
+{step === 1
+  ? (!requiresVerification
+      ? "Login"
+      : timeLeft > 0
+        ? "Code Already Sent"
+        : "Send Verification Code")
+  : "Verify & Login"}
 </button>
 
 
