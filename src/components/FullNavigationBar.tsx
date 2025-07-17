@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Activity, HeartPulse, Menu, X } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const FullNavigationBar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleNavClick = (href: string) => {
+  const handleNavClick = (path: string) => {
     setIsMobileMenuOpen(false);
-    window.location.href = href;
+    navigate(path);
   };
 
   return (
@@ -27,37 +29,35 @@ const FullNavigationBar: React.FC = () => {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-8">
-            <a 
-              href="/" 
-              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); setIsMobileMenuOpen(false); }}
+            <Link
+              to="/home"
+              onClick={() => setIsMobileMenuOpen(false)}
               className="text-black font-medium flex items-center gap-2 hover:text-blue-600 transition-colors"
             >
               <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
                 <Activity className="w-4 h-4 text-white" />
               </div>
               Home
-            </a>
-            <a 
-              href="/diagnosis" 
+            </Link>
+            <button
               onClick={() => handleNavClick('/diagnosis')}
-              className="text-black hover:text-blue-600 transition-colors flex items-center gap-2"
+              className="text-black hover:text-blue-600 transition-colors flex items-center gap-2 bg-transparent border-none cursor-pointer"
             >
               <HeartPulse className="w-5 h-5" />
               Health Diagnosis
-            </a>
-            <a 
-              href="/treatment" 
+            </button>
+            <button
               onClick={() => handleNavClick('/treatment')}
-              className="text-black hover:text-blue-600 transition-colors flex items-center gap-2"
+              className="text-black hover:text-blue-600 transition-colors flex items-center gap-2 bg-transparent border-none cursor-pointer"
             >
               <Activity className="w-5 h-5" />
               Treatment Planner
-            </a>
+            </button>
           </div>
 
           {/* Mobile menu icon */}
           <div className="md:hidden">
-            <button 
+            <button
               onClick={toggleMobileMenu}
               className="text-black p-2 hover:bg-black/10 rounded-lg transition-colors"
             >
@@ -67,38 +67,36 @@ const FullNavigationBar: React.FC = () => {
         </div>
 
         {/* Mobile Dropdown */}
-        <div className={`md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-blue-200 shadow-lg transition-all duration-300 ease-in-out ${
-          isMobileMenuOpen 
-            ? 'opacity-100 translate-y-0 visible' 
-            : 'opacity-0 -translate-y-4 invisible'
-        }`}>
+        <div
+          className={`md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-blue-200 shadow-lg transition-all duration-300 ease-in-out ${
+            isMobileMenuOpen ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-4 invisible'
+          }`}
+        >
           <div className="px-4 py-4 space-y-3">
-            <a 
-              href="/" 
-              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); setIsMobileMenuOpen(false); }}
+            <Link
+              to="/home"
+              onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center gap-3 text-black font-medium py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors"
             >
               <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
                 <Activity className="w-4 h-4 text-white" />
               </div>
               Home
-            </a>
-            <a 
-              href="/diagnosis" 
+            </Link>
+            <button
               onClick={() => handleNavClick('/diagnosis')}
-              className="flex items-center gap-3 text-black py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors"
+              className="flex items-center gap-3 text-black py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors bg-transparent border-none cursor-pointer"
             >
               <HeartPulse className="w-5 h-5 text-green-600" />
               Health Diagnosis
-            </a>
-            <a 
-              href="/treatment" 
+            </button>
+            <button
               onClick={() => handleNavClick('/treatment')}
-              className="flex items-center gap-3 text-black py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors"
+              className="flex items-center gap-3 text-black py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors bg-transparent border-none cursor-pointer"
             >
               <Activity className="w-5 h-5 text-blue-600" />
               Treatment Planner
-            </a>
+            </button>
           </div>
         </div>
       </div>
