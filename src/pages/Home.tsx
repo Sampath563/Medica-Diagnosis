@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Activity, HeartPulse, Menu, X } from 'lucide-react';
+import { Activity, HeartPulse, Menu, X, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
 
 function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -17,7 +16,7 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-transparent z-50">
         <div className="container mx-auto px-4 sm:px-6">
@@ -28,10 +27,9 @@ function Home() {
               className="flex items-center gap-2 sm:gap-3 cursor-pointer"
             >
               <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-lg flex items-center justify-center">
-  <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-</div>
-<span className="text-lg sm:text-xl font-bold text-white">MEDICA</span>
-
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+              </div>
+              <span className="text-lg sm:text-xl font-bold text-white">MEDICA</span>
             </div>
 
             {/* Desktop Navigation */}
@@ -60,16 +58,15 @@ function Home() {
                 Treatment Planner
               </button>
               <button
-  onClick={() => {
-    localStorage.clear();
-    navigate('/login');
-  }}
-  className="text-white hover:text-red-400 transition-colors flex items-center gap-2"
->
-  <LogOut className="w-5 h-5" />
-  Sign Out
-</button>
-
+                onClick={() => {
+                  localStorage.clear();
+                  navigate('/login');
+                }}
+                className="text-white hover:text-red-400 transition-colors flex items-center gap-2"
+              >
+                <LogOut className="w-5 h-5" />
+                Sign Out
+              </button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -94,7 +91,6 @@ function Home() {
             <div className="px-4 py-4 space-y-3">
               <button
                 onClick={() => handleNavigate('/home')}
-
                 className="flex items-center gap-3 text-blue-800 font-medium py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors w-full"
               >
                 <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
@@ -117,16 +113,15 @@ function Home() {
                 Treatment Planner
               </button>
               <button
-  onClick={() => {
-    localStorage.clear();
-    handleNavigate('/login');
-  }}
-  className="flex items-center gap-3 text-red-600 py-3 px-4 rounded-lg hover:bg-red-100 transition-colors w-full"
->
-  <LogOut className="w-5 h-5" />
-  Sign Out
-</button>
-
+                onClick={() => {
+                  localStorage.clear();
+                  handleNavigate('/login');
+                }}
+                className="flex items-center gap-3 text-red-600 py-3 px-4 rounded-lg hover:bg-red-100 transition-colors w-full"
+              >
+                <LogOut className="w-5 h-5" />
+                Sign Out
+              </button>
             </div>
           </div>
         </div>
@@ -166,6 +161,55 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {/* Footer Section */}
+      <footer className="bg-blue-900 text-white px-6 py-10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+          {/* Leader Info */}
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Main</h2>
+            <p className="mb-1">Sampath Kumar B</p>
+            <p className="mb-1">📞 +91 8217741448</p>
+            <p className="mb-1">📧 bsampath563@gmail.com</p>
+          </div>
+
+          {/* Team Members */}
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Team Members</h2>
+            <ul className="space-y-1">
+              <li>💡 Pruthvi Rag N M</li>
+              <li>💡 Varun B M</li>
+              <li>💡 Vivek Chandra</li>
+            </ul>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Quick Links</h2>
+            <ul className="space-y-1">
+              <li><button onClick={() => handleNavigate('/home')} className="hover:underline">🏠 Home</button></li>
+              <li><button onClick={() => handleNavigate('/diagnosis')} className="hover:underline">🩺 Diagnosis</button></li>
+              <li><button onClick={() => handleNavigate('/treatment')} className="hover:underline">💊 Treatment</button></li>
+            </ul>
+          </div>
+
+          {/* Feedback */}
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Feedback</h2>
+            <p className="mb-2">We value your thoughts!</p>
+            <a
+              href="mailto:sampath.medica@gmail.com?subject=MEDICA Feedback"
+              className="text-blue-300 hover:underline"
+            >
+              Send Feedback 💬
+            </a>
+          </div>
+        </div>
+
+        <div className="text-center mt-10 text-sm text-blue-200">
+          &copy; {new Date().getFullYear()} MEDICA. All rights reserved.
+        </div>
+      </footer>
     </div>
   );
 }
