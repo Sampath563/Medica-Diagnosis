@@ -23,7 +23,7 @@ function Home() {
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <div
-              onClick={() => handleNavigate('/')}
+              onClick={() => handleNavigate('/home')}
               className="flex items-center gap-2 sm:gap-3 cursor-pointer"
             >
               <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-lg flex items-center justify-center">
@@ -36,7 +36,7 @@ function Home() {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
               <button
-                onClick={() => handleNavigate('/')}
+                onClick={() => handleNavigate('/home')}
                 className="text-white font-medium flex items-center gap-2 hover:text-blue-200 transition-colors"
               >
                 <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
