@@ -1,8 +1,9 @@
 import { useLocation, Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { Activity, HeartPulse } from 'lucide-react';
-import NavigationBar from '../components/NavigationBar';
 import FullNavigationBar from '../components/FullNavigationBar';
+import NavigationBar from '../components/NavigationBar';
+
 const TreatmentPlanner: React.FC = () => {
   const location = useLocation();
   const state = location.state || { disease: '', age: '', symptoms: '' };

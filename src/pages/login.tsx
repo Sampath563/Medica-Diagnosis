@@ -52,12 +52,22 @@ const Login = () => {
       password: formData.password,
     });
 
-    if (res.data.step === 2) {
-      setMessage("📧 Verification code sent to your email.");
-      setError("");
-      setStep(2);
-      setTimeLeft(600);
-    }
+    if (res.data.token) {
+  // User already verified, skip step 2
+  setMessage("✅ Login successful!");
+  setError("");
+  localStorage.setItem("token", res.data.token);
+  setIsLoggedIn(true);
+  navigate("/home");
+} else if (res.data.step === 2) {
+  // First-time login, go to verification
+  setMessage("📧 Verification code sent to your email.");
+  setError("");
+  setStep(2);
+  setTimeLeft(600);
+}
+
+
   } catch (err: any) {
     console.error("❌ login-step1 error:", err.response || err.message);
     setError(err.response?.data?.message || "Step 1 failed.");
