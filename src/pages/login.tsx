@@ -16,6 +16,7 @@ const Login = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+const [requiresVerification, setRequiresVerification] = useState(true);
 
   const navigate = useNavigate();
 
@@ -56,7 +57,9 @@ const Login = () => {
       password: formData.password,
     });
 
- if (res.data.token) {
+ setRequiresVerification(!res.data.token);
+
+if (res.data.token) {
   setMessage("✅ Already verified! Logging in...");
   localStorage.setItem("token", res.data.token);
   setIsLoggedIn(true);
@@ -66,7 +69,6 @@ const Login = () => {
   setTimeLeft(600);
   setStep(2); // switch to code input
 }
-
 
 
 
@@ -160,7 +162,7 @@ const Login = () => {
                   ...(focusedInput === "password" ? styles.inputFocus : {}),
                 }}
               />
-              <button
+            <button
   type="submit"
   style={{
     ...styles.button,
@@ -169,9 +171,9 @@ const Login = () => {
   onMouseEnter={() => setIsHovering(true)}
   onMouseLeave={() => setIsHovering(false)}
 >
-  {step === 1 ? "Send Verification Code" : "Verify & Login"}
-
+  {step === 1 ? (requiresVerification ? "Send Verification Code" : "Login") : "Verify & Login"}
 </button>
+
 
 
             </form>
