@@ -8,6 +8,20 @@ function Home() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleHomeClick = (e) => {
+    e.preventDefault();
+    // Scroll to top of page (simulating home route)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleNavClick = (href) => {
+    // Close mobile menu when navigating
+    setIsMobileMenuOpen(false);
+    // In a real app, you would use router navigation here
+    console.log(`Navigating to ${href}`);
+  };
+
   return (
     <div className="min-h-screen">
       {/* Navigation */}
@@ -23,17 +37,29 @@ function Home() {
             
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
-              <a href="/" className="text-white font-medium flex items-center gap-2 hover:text-blue-200 transition-colors">
+              <a 
+                href="/" 
+                onClick={handleHomeClick}
+                className="text-white font-medium flex items-center gap-2 hover:text-blue-200 transition-colors"
+              >
                 <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
                   <Activity className="w-4 h-4 text-white" />
                 </div>
                 Home
               </a>
-              <a href="/diagnosis" className="text-white hover:text-blue-200 transition-colors flex items-center gap-2">
+              <a 
+                href="/diagnosis" 
+                onClick={() => handleNavClick('/diagnosis')}
+                className="text-white hover:text-blue-200 transition-colors flex items-center gap-2"
+              >
                 <HeartPulse className="w-5 h-5" />
                 Health Diagnosis
               </a>
-              <a href="/treatment" className="text-white hover:text-blue-200 transition-colors flex items-center gap-2">
+              <a 
+                href="/treatment" 
+                onClick={() => handleNavClick('/treatment')}
+                className="text-white hover:text-blue-200 transition-colors flex items-center gap-2"
+              >
                 <Activity className="w-5 h-5" />
                 Treatment Planner
               </a>
@@ -51,47 +77,49 @@ function Home() {
           </div>
           
           {/* Mobile Navigation Menu */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden absolute top-full left-0 right-0 bg-blue-900/95 backdrop-blur-md border-t border-white/10">
-              <div className="px-4 py-4 space-y-3">
-                <a 
-                  href="/" 
-                  className="flex items-center gap-3 text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
-                    <Activity className="w-4 h-4 text-white" />
-                  </div>
-                  Home
-                </a>
-                <a 
-                  href="/diagnosis" 
-                  className="flex items-center gap-3 text-white py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <HeartPulse className="w-5 h-5" />
-                  Health Diagnosis
-                </a>
-                <a 
-                  href="/treatment" 
-                  className="flex items-center gap-3 text-white py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Activity className="w-5 h-5" />
-                  Treatment Planner
-                </a>
-              </div>
+          <div className={`md:hidden absolute top-full left-0 right-0 bg-blue-50/95 backdrop-blur-md border-t border-blue-200 shadow-lg transition-all duration-300 ease-in-out ${
+            isMobileMenuOpen 
+              ? 'opacity-100 translate-y-0 visible' 
+              : 'opacity-0 -translate-y-4 invisible'
+          }`}>
+            <div className="px-4 py-4 space-y-3">
+              <a 
+                href="/" 
+                onClick={handleHomeClick}
+                className="flex items-center gap-3 text-blue-800 font-medium py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
+                Home
+              </a>
+              <a 
+                href="/diagnosis" 
+                onClick={() => handleNavClick('/diagnosis')}
+                className="flex items-center gap-3 text-blue-800 py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                <HeartPulse className="w-5 h-5 text-green-600" />
+                Health Diagnosis
+              </a>
+              <a 
+                href="/treatment" 
+                onClick={() => handleNavClick('/treatment')}
+                className="flex items-center gap-3 text-blue-800 py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                <Activity className="w-5 h-5 text-blue-600" />
+                Treatment Planner
+              </a>
             </div>
-          )}
+          </div>
         </div>
       </nav>
 
-      {/* Hero Section - Exact match to your image */}
+      {/* Hero Section - Responsive */}
       <section className="relative h-screen flex items-center">
         {/* Blue overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/60 to-blue-700/50 z-10"></div>
 
-        {/* Background Image - Exact same as your image */}
+        {/* Background Image */}
         <div 
           className="absolute inset-0 bg-[url('https://images.pexels.com/photos/3259629/pexels-photo-3259629.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')] bg-cover bg-center"
         ></div>
@@ -107,17 +135,23 @@ function Home() {
               simplifying diagnosis and treatment planning through our innovative platform.
             </p>
 
-            {/* Action Buttons - Updated with icons instead of arrows */}
+            {/* Action Buttons - Responsive */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
               <a href="/diagnosis" className="w-full sm:w-auto">
-                <button className="group bg-green-500 hover:bg-green-600 text-white text-base sm:text-lg font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center gap-3 w-full sm:min-w-[200px]">
+                <button 
+                  onClick={() => handleNavClick('/diagnosis')}
+                  className="group bg-green-500 hover:bg-green-600 text-white text-base sm:text-lg font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center gap-3 w-full sm:min-w-[200px]"
+                >
                   <HeartPulse className="w-5 h-5" />
                   Health Diagnosis
                 </button>
               </a>
               
               <a href="/treatment" className="w-full sm:w-auto">
-                <button className="group bg-white text-blue-700 hover:bg-gray-50 text-base sm:text-lg font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center gap-3 w-full sm:min-w-[200px]">
+                <button 
+                  onClick={() => handleNavClick('/treatment')}
+                  className="group bg-white text-blue-700 hover:bg-gray-50 text-base sm:text-lg font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center gap-3 w-full sm:min-w-[200px]"
+                >
                   <Activity className="w-5 h-5" />
                   Treatment Planner
                 </button>
