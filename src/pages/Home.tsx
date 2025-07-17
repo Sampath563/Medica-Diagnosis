@@ -194,190 +194,187 @@ function Home() {
       
       
 
-      {/* Footer Section */}
-      <footer className="relative bg-gradient-to-r from-blue-900 to-blue-700 text-white px-6 py-16 mt-12">
-        {/* Background Pattern Overlay */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
-        </div>
-        
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {/* Leader Info */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                  <Activity className="w-6 h-6 text-blue-600" />
-                </div>
-                <h2 className="text-2xl font-bold text-white">MEDICA</h2>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-blue-200 border-b border-blue-600 pb-2">Main</h3>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                  <p className="font-semibold text-xl text-white mb-3">Sampath Kumar B</p>
-                  <div className="space-y-2">
-                    <a 
-                      href="tel:+918217741448" 
-                      className="flex items-center gap-3 text-blue-200 hover:text-white transition-all duration-300 group"
-                    >
-                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <span className="text-white text-sm">📞</span>
-                      </div>
-                      <span className="font-medium">+91 8217741448</span>
-                    </a>
-                    <a 
-                      href="mailto:bsampath563@gmail.com" 
-                      className="flex items-center gap-3 text-blue-200 hover:text-white transition-all duration-300 group"
-                    >
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <span className="text-white text-sm">📧</span>
-                      </div>
-                      <span className="font-medium">bsampath563@gmail.com</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Team Members */}
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-blue-200 border-b border-blue-600 pb-2">Development Team</h3>
-              <div className="space-y-3">
-                {[
-                  { name: "Pruthvi Raj N M", role: "Project Manager" },
-                  { name: "Varun B M", role: "Research Analyst" },
-                  { name: "Vivek Chandra", role: "Technical Support" }
-                ].map((member, index) => (
-                  <div key={index} className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">{member.name.charAt(0)}</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-white">{member.name}</p>
-                        <p className="text-blue-200 text-sm">{member.role}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-blue-200 border-b border-blue-600 pb-2">Quick Navigation</h3>
-              <div className="space-y-3">
-                {[
-                  { name: "Home", path: "/home", icon: "🏠", color: "from-blue-500 to-blue-600" },
-                  { name: "Health Diagnosis", path: "/diagnosis", icon: "🩺", color: "from-green-500 to-green-600" },
-                  { name: "Treatment Planner", path: "/treatment", icon: "💊", color: "from-purple-500 to-purple-600" }
-                ].map((link, index) => (
-                  <button 
-                    key={index}
-                    onClick={() => handleNavigate(link.path)} 
-                    className="flex items-center gap-3 w-full text-left bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20 hover:bg-white/20 transition-all duration-300 group"
-                  >
-                    <div className={`w-10 h-10 bg-gradient-to-r ${link.color} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                      <span className="text-white text-lg">{link.icon}</span>
-                    </div>
-                    <span className="font-medium text-white group-hover:text-blue-200">{link.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Enhanced Feedback Form */}
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-blue-200 border-b border-blue-600 pb-2">Send Feedback</h3>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    const form = e.target as HTMLFormElement;
-                    const formData = new FormData(form);
-                    const payload = {
-                      name: formData.get('name'),
-                      email: formData.get('email'),
-                      message: formData.get('message'),
-                    };
-
-                    try {
-                      const res = await fetch("https://medica-backend-3.onrender.com/api/feedback", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload),
-                      });
-                      const data = await res.json();
-                      if (data.success) {
-                        alert("Thank you for your feedback!");
-                        form.reset();
-                      } else {
-                        alert("Error: " + data.error);
-                      }
-                    } catch (err) {
-                      alert("Failed to submit feedback");
-                    }
-                  }}
-                  className="space-y-4"
-                >
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="name"
-                      required
-                      placeholder="Your Name"
-                      className="w-full p-3 rounded-lg bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all duration-300"
-                    />
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="email"
-                      name="email"
-                      required
-                      placeholder="Your Email"
-                      className="w-full p-3 rounded-lg bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all duration-300"
-                    />
-                  </div>
-                  <div className="relative">
-                    <textarea
-                      name="message"
-                      required
-                      rows={4}
-                      placeholder="Your Feedback"
-                      className="w-full p-3 rounded-lg bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white resize-none transition-all duration-300"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold transform hover:scale-105 shadow-lg hover:shadow-xl"
-                  >
-                    Submit Feedback
-                  </button>
-                </form>
-              </div>
-            </div>
+      {/* Footer Section - Light Blue Gradient Background */}
+<footer className="relative bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 text-gray-800 px-6 py-16">
+  {/* Subtle overlay for distinction */}
+  <div className="absolute inset-0 bg-gradient-to-r from-blue-200/20 to-blue-300/20"></div>
+  
+  <div className="max-w-6xl mx-auto relative z-10">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+      {/* Leader Info */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+            <Activity className="w-6 h-6 text-blue-600" />
           </div>
-
-          {/* Enhanced Bottom Bar */}
-          <div className="border-t border-blue-600 pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-              <div className="text-center md:text-left">
-                <p className="text-blue-200 font-medium">
-                  &copy; {new Date().getFullYear()} MEDICA - Multimodal Engine for Diagnosis, Intervention, Care and Assistance
-                </p>
-                <p className="text-blue-300 text-sm mt-2">
-                  All rights reserved. Empowering healthcare through innovation and technology.
-                </p>
-              </div>
-              <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 border border-white/20">
-                <span className="text-blue-200 font-medium">Made with</span>
-                <span className="text-red-400 animate-pulse text-xl">❤️</span>
-                <span className="text-blue-200 font-medium">for better healthcare</span>
-              </div>
+          <h2 className="text-2xl font-bold text-blue-800">MEDICA</h2>
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-blue-700 border-b border-blue-400 pb-2">Main</h3>
+          <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-blue-300/30 shadow-sm">
+            <p className="font-semibold text-xl text-blue-800 mb-3">Sampath Kumar B</p>
+            <div className="space-y-2">
+              <a 
+                href="tel:+918217741448" 
+                className="flex items-center gap-3 text-blue-700 hover:text-blue-900 transition-all duration-300 group"
+              >
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="text-white text-sm">📞</span>
+                </div>
+                <span className="font-medium">+91 8217741448</span>
+              </a>
+              <a 
+                href="mailto:bsampath563@gmail.com" 
+                className="flex items-center gap-3 text-blue-700 hover:text-blue-900 transition-all duration-300 group"
+              >
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="text-white text-sm">📧</span>
+                </div>
+                <span className="font-medium">bsampath563@gmail.com</span>
+              </a>
             </div>
           </div>
         </div>
-      </footer>
+      </div>
+
+      {/* Team Members */}
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold text-blue-700 border-b border-blue-400 pb-2">Development Team</h3>
+        <div className="space-y-3">
+          {[
+            { name: "Pruthvi Raj N M", role: "Project Manager" },
+            { name: "Varun B M", role: "Research Analyst" },
+            { name: "Vivek Chandra", role: "Technical Support" }
+          ].map((member, index) => (
+            <div key={index} className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-blue-300/30 shadow-sm hover:bg-white/70 transition-all duration-300">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">{member.name.charAt(0)}</span>
+                </div>
+                <div>
+                  <p className="font-semibold text-blue-800">{member.name}</p>
+                  <p className="text-blue-600 text-sm">{member.role}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Links */}
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold text-blue-700 border-b border-blue-400 pb-2">Quick Navigation</h3>
+        <div className="space-y-3">
+          {[
+            { name: "Home", path: "/home", icon: "🏠", color: "from-blue-500 to-blue-600" },
+            { name: "Health Diagnosis", path: "/diagnosis", icon: "🩺", color: "from-green-500 to-green-600" },
+            { name: "Treatment Planner", path: "/treatment", icon: "💊", color: "from-purple-500 to-purple-600" }
+          ].map((link, index) => (
+            <button 
+              key={index}
+              onClick={() => handleNavigate(link.path)} 
+              className="flex items-center gap-3 w-full text-left bg-white/50 backdrop-blur-sm rounded-lg p-3 border border-blue-300/30 shadow-sm hover:bg-white/70 transition-all duration-300 group"
+            >
+              <div className={`w-10 h-10 bg-gradient-to-r ${link.color} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                <span className="text-white text-lg">{link.icon}</span>
+              </div>
+              <span className="font-medium text-blue-800 group-hover:text-blue-900">{link.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Enhanced Feedback Form */}
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold text-blue-200 border-b border-blue-600 pb-2">Send Feedback</h3>
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.target as HTMLFormElement;
+              const formData = new FormData(form);
+              const payload = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                message: formData.get('message'),
+              };
+              try {
+                const res = await fetch("https://medica-backend-3.onrender.com/api/feedback", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+                if (data.success) {
+                  alert("Thank you for your feedback!");
+                  form.reset();
+                } else {
+                  alert("Error: " + data.error);
+                }
+              } catch (err) {
+                alert("Failed to submit feedback");
+              }
+            }}
+            className="space-y-4"
+          >
+            <div className="relative">
+              <input
+                type="text"
+                name="name"
+                required
+                placeholder="Your Name"
+                className="w-full p-3 rounded-lg bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all duration-300"
+              />
+            </div>
+            <div className="relative">
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder="Your Email"
+                className="w-full p-3 rounded-lg bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all duration-300"
+              />
+            </div>
+            <div className="relative">
+              <textarea
+                name="message"
+                required
+                rows={4}
+                placeholder="Your Feedback"
+                className="w-full p-3 rounded-lg bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white resize-none transition-all duration-300"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              Submit Feedback
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {/* Enhanced Bottom Bar */}
+    <div className="border-t border-blue-400 pt-8">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="text-center md:text-left">
+          <p className="text-blue-700 font-medium">
+            &copy; {new Date().getFullYear()} MEDICA - Multimodal Engine for Diagnosis, Intervention, Care and Assistance
+          </p>
+          <p className="text-blue-600 text-sm mt-2">
+            All rights reserved. Empowering healthcare through innovation and technology.
+          </p>
+        </div>
+        <div className="flex items-center gap-4 bg-white/50 backdrop-blur-sm rounded-full px-6 py-3 border border-blue-300/30">
+          <span className="text-blue-700 font-medium">Made with</span>
+          <span className="text-red-400 animate-pulse text-xl">❤️</span>
+          <span className="text-blue-700 font-medium">for better healthcare</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
     </div>
   );
 }
