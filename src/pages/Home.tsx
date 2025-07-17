@@ -27,9 +27,10 @@ function Home() {
               className="flex items-center gap-2 sm:gap-3 cursor-pointer"
             >
               <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-lg flex items-center justify-center">
-                <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-              </div>
-              <span className="text-lg sm:text-xl font-bold text-blue-500">MEDICA</span>
+  <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+</div>
+<span className="text-lg sm:text-xl font-bold text-white">MEDICA</span>
+
             </div>
 
             {/* Desktop Navigation */}
