@@ -107,10 +107,11 @@ const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   };
 
   return (
-      <FullNavigationBar />
+  <>
+    <FullNavigationBar />
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <nav className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div className="flex justify-between items-center h-16">
       {/* Logo */}
       <div className="flex items-center space-x-3">
