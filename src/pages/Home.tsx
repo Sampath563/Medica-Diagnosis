@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Activity, HeartPulse, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 
 function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -58,6 +59,17 @@ function Home() {
                 <Activity className="w-5 h-5" />
                 Treatment Planner
               </button>
+              <button
+  onClick={() => {
+    localStorage.clear();
+    navigate('/login');
+  }}
+  className="text-white hover:text-red-400 transition-colors flex items-center gap-2"
+>
+  <LogOut className="w-5 h-5" />
+  Sign Out
+</button>
+
             </div>
 
             {/* Mobile Menu Button */}
@@ -104,6 +116,17 @@ function Home() {
                 <Activity className="w-5 h-5 text-blue-600" />
                 Treatment Planner
               </button>
+              <button
+  onClick={() => {
+    localStorage.clear();
+    handleNavigate('/login');
+  }}
+  className="flex items-center gap-3 text-red-600 py-3 px-4 rounded-lg hover:bg-red-100 transition-colors w-full"
+>
+  <LogOut className="w-5 h-5" />
+  Sign Out
+</button>
+
             </div>
           </div>
         </div>
