@@ -174,13 +174,18 @@ navigate("/home");
   onMouseEnter={() => setIsHovering(true)}
   onMouseLeave={() => setIsHovering(false)}
 >
-{step === 1
-  ? (!requiresVerification
-      ? "Login"
-      : timeLeft > 0
-        ? "Code Already Sent"
-        : "Send Verification Code")
-  : "Verify & Login"}
+{step === 1 ? (
+  !requiresVerification ? (
+    "Login"
+  ) : timeLeft > 0 ? (
+    "Code Already Sent"
+  ) : (
+    "Send Verification Code"
+  )
+) : (
+  "Verify & Login"
+)}
+
 </button>
 
 
