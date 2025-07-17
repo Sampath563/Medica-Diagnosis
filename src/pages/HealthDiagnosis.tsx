@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Activity, Heart, Thermometer, Droplets, User, Calendar, AlertCircle, CheckCircle, Loader2, Plus } from 'lucide-react';
 import NavigationBar from '../components/NavigationBar';
 import { useNavigate } from 'react-router-dom';
-
+import FullNavigationBar from '../components/FullNavigationBar';
 interface PredictionResult {
   predicted_disease: string;
   confidence: number;
@@ -244,7 +244,7 @@ const handleSubmit = async () => {
 
   return (
     <>
-      <NavigationBar />
+      <FullNavigationBar />
 <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-16">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}

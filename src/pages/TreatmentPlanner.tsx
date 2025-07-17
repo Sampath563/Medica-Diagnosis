@@ -2,7 +2,7 @@ import { useLocation, Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { Activity, HeartPulse } from 'lucide-react';
 import NavigationBar from '../components/NavigationBar';
-
+import FullNavigationBar from '../components/FullNavigationBar';
 const TreatmentPlanner: React.FC = () => {
   const location = useLocation();
   const state = location.state || { disease: '', age: '', symptoms: '' };
@@ -107,6 +107,7 @@ const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   };
 
   return (
+      <FullNavigationBar />
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <nav className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
