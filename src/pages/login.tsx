@@ -53,19 +53,18 @@ const Login = () => {
     });
 
     if (res.data.token) {
-  // User already verified, skip step 2
+  // Already verified user
   setMessage("✅ Login successful!");
-  setError("");
-  localStorage.setItem("token", res.data.token);
   setIsLoggedIn(true);
+  localStorage.setItem("token", res.data.token);
   navigate("/home");
 } else if (res.data.step === 2) {
-  // First-time login, go to verification
+  // First-time login, needs verification
   setMessage("📧 Verification code sent to your email.");
-  setError("");
   setStep(2);
   setTimeLeft(600);
 }
+
 
 
   } catch (err: any) {
@@ -160,8 +159,11 @@ const Login = () => {
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
               >
-                Send Verification Code
+                {step === 1 && message === "📧 Verification code sent to your email."
+                  ? "Resend Verification Code"
+                  : "Login"}
               </button>
+
             </form>
           ) : (
             <form onSubmit={handleStep2} style={styles.form}>
