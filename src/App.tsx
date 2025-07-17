@@ -10,17 +10,7 @@ import Register from './pages/register';
 // Function to validate token (you can expand this later for real JWT checks)
 const validateToken = (token: string | null) => {
   console.log("Validating token:", token);
-  // Add more robust validation here if needed, e.g., JWT expiration check
-  if (!token) return false;
-  try {
-    // Basic check for JWT format: three parts separated by dots
-    const parts = token.split('.');
-    if (parts.length !== 3) return false;
-    // Optionally decode and check expiration here
-    return true;
-  } catch (error) {
-    return false;
-  }
+  return !!token; // true if token exists, false otherwise
 };
 
 // Protected Route wrapper
