@@ -111,11 +111,37 @@ const navigate = useNavigate();
       [name]: value
     }));
   };
+
+  // Function to check if all fields are filled
+  const isFormValid = () => {
+    return (
+      formData.symptoms.trim() !== '' &&
+      formData.age.trim() !== '' &&
+      formData.gender.trim() !== '' &&
+      formData.severity.trim() !== '' &&
+      formData.temperature.trim() !== '' &&
+      formData.heart_rate.trim() !== '' &&
+      formData.blood_pressure.trim() !== '' &&
+      formData.oxygen_saturation.trim() !== '' &&
+      !tempError &&
+      !heartRateError &&
+      !bpError &&
+      !oxygenSatError
+    );
+  };
+
 const handleSubmit = async () => {
   setLoading(true);
   setError(null);
   setSymptomsError(null);
   setPrediction(null);
+
+  // Check if all fields are filled
+  if (!isFormValid()) {
+    setError('Please fill in all required fields with valid values before getting diagnosis.');
+    setLoading(false);
+    return;
+  }
 
   // Validate symptoms
   const allowedSymptoms = [
@@ -187,8 +213,6 @@ const handleSubmit = async () => {
     setLoading(false);
   }
 };
-
-
 
   const resetForm = () => {
     setFormData({
@@ -408,8 +432,12 @@ const handleSubmit = async () => {
                 <div className="flex space-x-4">
                   <button
                     onClick={handleSubmit}
-                    disabled={loading}
-                    className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
+                    disabled={loading || !isFormValid()}
+                    className={`flex-1 py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center ${
+                      loading || !isFormValid() 
+                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
                   >
                     {loading ? (
                       <>
