@@ -81,7 +81,8 @@ function Home() {
           >
             <div className="px-4 py-4 space-y-3">
               <button
-                onClick={() => handleNavigate('/')}
+                onClick={() => handleNavigate('/home')}
+
                 className="flex items-center gap-3 text-blue-800 font-medium py-3 px-4 rounded-lg hover:bg-blue-100 transition-colors w-full"
               >
                 <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
