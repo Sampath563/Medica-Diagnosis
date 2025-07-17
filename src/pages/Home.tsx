@@ -1,8 +1,37 @@
 import React, { useState } from 'react';
 import { Activity, HeartPulse, Menu, X, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from "axios";
+
 
 function Home() {
+    const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState("");
+
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("Submitting...");
+
+    try {
+      const res = await axios.post("https://medica-backend-3.onrender.com/api/feedback", {
+        email,
+        message,
+      });
+
+      if (res.data.success) {
+        setStatus("✅ Feedback submitted!");
+        setEmail("");
+        setMessage("");
+      } else {
+        setStatus("❌ " + res.data.message);
+      }
+    } catch (error) {
+      setStatus("❌ Failed to submit. Try again later.");
+      console.error(error);
+    }
+  };
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -160,7 +189,9 @@ function Home() {
             </div>
           </div>
         </div>
+        
       </section>
+      
 
       {/* Footer Section */}
       <footer className="bg-transparent text-white px-6 py-12 mt-12">
