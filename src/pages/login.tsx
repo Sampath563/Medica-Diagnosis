@@ -334,7 +334,12 @@ const Login = () => {
                 required
                 onChange={handleForgotPasswordChange}
                 value={forgotPasswordData.email}
-                style={styles.input}
+                onFocus={() => setFocusedInput("forgotEmail")}
+                onBlur={() => setFocusedInput(null)}
+                style={{
+                  ...styles.input,
+                  ...(focusedInput === "forgotEmail" ? styles.inputFocus : {}),
+                }}
               />
               <button 
                 type="submit" 
@@ -370,7 +375,12 @@ const Login = () => {
                 required
                 onChange={handleForgotPasswordChange}
                 value={forgotPasswordData.resetCode}
-                style={styles.input}
+                onFocus={() => setFocusedInput("resetCode")}
+                onBlur={() => setFocusedInput(null)}
+                style={{
+                  ...styles.input,
+                  ...(focusedInput === "resetCode" ? styles.inputFocus : {}),
+                }}
               />
               <input
                 type="password"
@@ -379,7 +389,12 @@ const Login = () => {
                 required
                 onChange={handleForgotPasswordChange}
                 value={forgotPasswordData.newPassword}
-                style={styles.input}
+                onFocus={() => setFocusedInput("newPassword")}
+                onBlur={() => setFocusedInput(null)}
+                style={{
+                  ...styles.input,
+                  ...(focusedInput === "newPassword" ? styles.inputFocus : {}),
+                }}
               />
               <input
                 type="password"
@@ -388,7 +403,12 @@ const Login = () => {
                 required
                 onChange={handleForgotPasswordChange}
                 value={forgotPasswordData.confirmPassword}
-                style={styles.input}
+                onFocus={() => setFocusedInput("confirmPassword")}
+                onBlur={() => setFocusedInput(null)}
+                style={{
+                  ...styles.input,
+                  ...(focusedInput === "confirmPassword" ? styles.inputFocus : {}),
+                }}
               />
               <button 
                 type="submit" 
