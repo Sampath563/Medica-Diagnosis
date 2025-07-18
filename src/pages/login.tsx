@@ -154,7 +154,8 @@ const handleForgotPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 const handleForgotPasswordStep1 = async (e: React.FormEvent) => {
   e.preventDefault();
   try {
-    const res = await axios.post("https://medica-backend-3.onrender.com/api/forgot-password", {
+    const res = await axios.post('https://medica-backend-3.onrender.com/api/send-reset-code', {
+
       email: forgotPasswordData.email,
     });
     setMessage("📧 Reset code sent to your email.");
