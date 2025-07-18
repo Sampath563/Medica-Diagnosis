@@ -210,7 +210,7 @@ function Home() {
           <h2 className="text-2xl font-bold text-blue-800">MEDICA</h2>
         </div>
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-blue-700 border-b border-blue-400 pb-2">Main</h3>
+          <h3 className="text-lg font-semibold text-blue-700 border-b border-blue-400 pb-2">Codeface</h3>
           <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-blue-300/30 shadow-sm">
             <p className="font-semibold text-xl text-blue-800 mb-3">Sampath Kumar B</p>
             <div className="space-y-2">
@@ -286,8 +286,8 @@ function Home() {
 
       {/* Enhanced Feedback Form */}
       <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-blue-200 border-b border-blue-600 pb-2">Send Feedback</h3>
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+        <h3 className="text-lg font-semibold text-blue-700 border-b border-blue-400 pb-2">Send Feedback</h3>
+        <div className="space-y-3">
           <form
             onSubmit={async (e) => {
               e.preventDefault();
