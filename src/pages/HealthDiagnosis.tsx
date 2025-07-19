@@ -2,15 +2,37 @@ import React, { useState } from 'react';
 import { Activity, Heart, Thermometer, Droplets, User, Calendar, AlertCircle, CheckCircle, Loader2, Plus } from 'lucide-react';
 import NavigationBar from '../components/NavigationBar';
 import { useNavigate } from 'react-router-dom';
-import FullNavigationBar from '../components/FullNavigationBar';
+
+// Updated interfaces to support top_predictions
+interface SinglePrediction {
+  disease: string;
+  confidence: number;
+}
+
+interface ModelPrediction {
+  disease: string;
+  confidence: number;
+  top_predictions?: SinglePrediction[];
+}
+
 interface PredictionResult {
   predicted_disease: string;
   confidence: number;
   all_predictions: {
-    [key: string]: {
-      disease: string;
-      confidence: number;
-    };
+    [key: string]: ModelPrediction;
+  };
+}
+
+// Interface for backend response structure
+interface BackendPrediction {
+  prediction: string;
+  confidence: number;
+  top_predictions?: SinglePrediction[];
+}
+
+interface BackendResponse {
+  result: {
+    [key: string]: BackendPrediction;
   };
 }
 
@@ -49,7 +71,7 @@ const HealthDiagnosis: React.FC = () => {
   // New state for symptoms error
   const [symptomsError, setSymptomsError] = useState<string | null>(null);
 
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -112,107 +134,100 @@ const navigate = useNavigate();
     }));
   };
 
-  // Function to check if all fields are filled
-  const isFormValid = () => {
-    return (
-      formData.symptoms.trim() !== '' &&
-      formData.age.trim() !== '' &&
-      formData.gender.trim() !== '' &&
-      formData.severity.trim() !== '' &&
-      formData.temperature.trim() !== '' &&
-      formData.heart_rate.trim() !== '' &&
-      formData.blood_pressure.trim() !== '' &&
-      formData.oxygen_saturation.trim() !== '' &&
-      !tempError &&
-      !heartRateError &&
-      !bpError &&
-      !oxygenSatError
-    );
-  };
-
-const handleSubmit = async () => {
-  setLoading(true);
-  setError(null);
-  setSymptomsError(null);
-  setPrediction(null);
-
-  // Check if all fields are filled
-  if (!isFormValid()) {
-    setError('Please fill in all required fields with valid values before getting diagnosis.');
-    setLoading(false);
-    return;
-  }
-
-  // Validate symptoms
-  const allowedSymptoms = [
-    "abdominal pain", "back pain", "balance problems", "bloating", "blurred vision", "body pain",
-    "bone fractures", "bone pain", "burning sensation", "chest pain", "chest tightness", "chills",
-    "cold", "concentration problems", "confusion", "congestion", "constipation", "cough",
-    "diarrhea", "difficulty concentrating", "difficulty swallowing", "difficulty walking", "dizziness",
-    "dry mouth", "easy bruising", "excessive sweating", "facial pain", "fatigue", "fever",
-    "frequent infections", "frequent urination", "hair loss", "headache", "heartburn", "irritability",
-    "itching", "jaundice", "joint pain", "loss of appetite", "loss of height", "loss of taste",
-    "memory loss", "mood changes", "mucus production", "muscle weakness", "nausea", "neck pain",
-    "neck stiffness", "night sweats", "pale skin", "palpitations", "rapid breathing", "rapid heartbeat",
-    "rash", "rectal bleeding", "redness", "seizures", "sensitivity to light", "shortness of breath",
-    "skin rash", "sleep problems", "snoring", "sore throat", "stiffness", "sweating", "swelling",
-    "swollen glands", "swollen lymph nodes", "thirst", "tremor", "vomiting", "weakness", "weight gain",
-    "weight loss", "wheezing"
-  ];
-
-  const inputSymptoms = formData.symptoms
-    .split(',')
-    .map(symptom => symptom.trim().toLowerCase())
-    .filter(s => s !== '');
-
-  const invalidSymptoms = inputSymptoms.filter(symptom => !allowedSymptoms.includes(symptom));
-
-  if (invalidSymptoms.length > 0) {
-    setSymptomsError(`Invalid symptom(s): ${invalidSymptoms.join(', ')}`);
-    setLoading(false);
-    return;
-  }
-
-  try {
-    const backendBaseUrl = import.meta.env.VITE_BACKEND_URL;
-
-    const response = await fetch(`${backendBaseUrl}/predict`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to get prediction');
+  const handleSubmit = async () => {
+    // Check required fields
+    if (!formData.symptoms || !formData.age || !formData.gender || !formData.severity || 
+        !formData.temperature || !formData.heart_rate || !formData.blood_pressure || 
+        !formData.oxygen_saturation) {
+      setError('Please fill in all required fields');
+      return;
     }
 
-    const result = await response.json();
-    const backendPredictions = result.result || {};
-    const firstModelKey = Object.keys(backendPredictions)[0] || '';
-    const transformedPrediction = {
-      predicted_disease: firstModelKey ? backendPredictions[firstModelKey].prediction : '',
-      confidence: firstModelKey ? backendPredictions[firstModelKey].confidence : 0,
-      all_predictions: {} as { [key: string]: { disease: string; confidence: number } }
-    };
+    // Also check if any inline vital sign errors exist before submission
+    if (tempError || heartRateError || bpError || oxygenSatError) {
+      setError('Please fix the errors in vital signs before submitting');
+      return;
+    }
 
-    for (const [model, pred] of Object.entries(backendPredictions)) {
-      const p = pred as { prediction: string; confidence: number };
-      transformedPrediction.all_predictions[model] = {
-        disease: p.prediction,
-        confidence: p.confidence
+    // Validate symptoms
+    const allowedSymptoms = [
+      "abdominal pain", "back pain", "balance problems", "bloating", "blurred vision", "body pain",
+      "bone fractures", "bone pain", "burning sensation", "chest pain", "chest tightness", "chills",
+      "cold", "concentration problems", "confusion", "congestion", "constipation", "cough",
+      "diarrhea", "difficulty concentrating", "difficulty swallowing", "difficulty walking", "dizziness",
+      "dry mouth", "easy bruising", "excessive sweating", "facial pain", "fatigue", "fever",
+      "frequent infections", "frequent urination", "hair loss", "headache", "heartburn", "irritability",
+      "itching", "jaundice", "joint pain", "loss of appetite", "loss of height", "loss of taste",
+      "memory loss", "mood changes", "mucus production", "muscle weakness", "nausea", "neck pain",
+      "neck stiffness", "night sweats", "pale skin", "palpitations", "rapid breathing", "rapid heartbeat",
+      "rash", "rectal bleeding", "redness", "seizures", "sensitivity to light", "shortness of breath",
+      "skin rash", "sleep problems", "snoring", "sore throat", "stiffness", "sweating", "swelling",
+      "swollen glands", "swollen lymph nodes", "thirst", "tremor", "vomiting", "weakness", "weight gain",
+      "weight loss", "wheezing"
+    ];
+
+    const inputSymptoms = formData.symptoms
+      .toLowerCase()
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    const invalidSymptoms = inputSymptoms.filter(symptom => !allowedSymptoms.includes(symptom));
+
+    if (invalidSymptoms.length > 0) {
+      setSymptomsError(`Invalid symptom(s): ${invalidSymptoms.join(', ')}`);
+      return;
+    }
+
+    // Proceed to backend submission
+    setLoading(true);
+    setError(null);
+    setSymptomsError(null);
+    setPrediction(null);
+
+    try {
+      const backendBaseUrl = 'http://localhost:8000';
+
+      const response = await fetch(`${backendBaseUrl}/predict`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to get prediction');
+      }
+
+      const result: BackendResponse = await response.json();
+      const backendPredictions = result.result || {};
+      const firstModelKey = Object.keys(backendPredictions)[0] || '';
+      
+      const transformedPrediction: PredictionResult = {
+        predicted_disease: firstModelKey ? backendPredictions[firstModelKey].prediction : '',
+        confidence: firstModelKey ? backendPredictions[firstModelKey].confidence : 0,
+        all_predictions: {}
       };
-    }
 
-    setPrediction(transformedPrediction);
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'An error occurred');
-  } finally {
-    setLoading(false);
-  }
-};
+      // Transform backend predictions to match our interface
+      for (const [model, pred] of Object.entries(backendPredictions)) {
+        transformedPrediction.all_predictions[model] = {
+          disease: pred.prediction,
+          confidence: pred.confidence,
+          // Safely handle top_predictions - this should now work without TypeScript errors
+          top_predictions: pred.top_predictions || undefined
+        };
+      }
+      
+      setPrediction(transformedPrediction);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -231,21 +246,21 @@ const handleSubmit = async () => {
   };
 
   const navigateToTreatment = () => {
-  if (!prediction) return;                   // no prediction, nothing to send
+    if (!prediction) return;
 
-  navigate('/treatment-planner', {
-    state: {
-      disease: prediction.predicted_disease,
-      age: formData.age,
-      symptoms: formData.symptoms,
-    },
-  });
-};
+    navigate('/treatment-planner', {
+      state: {
+        disease: prediction.predicted_disease,
+        age: formData.age,
+        symptoms: formData.symptoms,
+      },
+    });
+  };
 
   return (
     <>
-      <FullNavigationBar />
-<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-16">
+      <NavigationBar />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 mt-10">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="text-center mb-8">
@@ -432,12 +447,8 @@ const handleSubmit = async () => {
                 <div className="flex space-x-4">
                   <button
                     onClick={handleSubmit}
-                    disabled={loading || !isFormValid()}
-                    className={`flex-1 py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center ${
-                      loading || !isFormValid() 
-                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}
+                    disabled={loading}
+                    className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
                   >
                     {loading ? (
                       <>
@@ -480,37 +491,52 @@ const handleSubmit = async () => {
               {prediction && (
                 <div className="space-y-4">
                   <div className="bg-green-50 border border-green-200 rounded-md p-4">
-  <div className="flex items-center mb-2">
-    <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-    <span className="text-green-700 font-medium">Primary Diagnosis</span>
-  </div>
-  <div className="text-2xl font-bold text-green-800 mb-2 text-center">
-    {prediction.predicted_disease}
-  </div>
-  <div className="text-sm text-green-600 text-center mb-4">
-    Confidence: {(prediction.confidence * 100).toFixed(1)}%
-  </div>
-  <div className="text-center">
-    <button
-      onClick={navigateToTreatment}
-      className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-md shadow"
-    >
-      Generate Treatment Plan for {prediction.predicted_disease}
-    </button>
-  </div>
-</div>
+                    <div className="flex items-center mb-2">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                      <span className="text-green-700 font-medium">Primary Diagnosis</span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-800 mb-2 text-center">
+                      {prediction.predicted_disease}
+                    </div>
+                    <div className="text-sm text-green-600 text-center mb-4">
+                      Confidence: {(prediction.confidence * 100).toFixed(1)}%
+                    </div>
+                    <div className="text-center">
+                      <button
+                        onClick={navigateToTreatment}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-md shadow"
+                      >
+                        Generate Treatment Plan for {prediction.predicted_disease}
+                      </button>
+                    </div>
+                  </div>
 
                   {prediction.all_predictions && Object.keys(prediction.all_predictions).length > 1 && (
                     <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
                       <h4 className="font-medium text-blue-800 mb-3">All Model Predictions:</h4>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {Object.entries(prediction.all_predictions).map(([model, pred]) => (
-                          <div key={model} className="flex justify-between items-center bg-white p-2 rounded">
-                            <span className="text-sm text-gray-600 capitalize">{model} Model:</span>
-                            <div className="text-right">
-                              <div className="text-sm font-medium">{pred.disease}</div>
-                              <div className="text-xs text-gray-500">{(pred.confidence * 100).toFixed(1)}%</div>
+                          <div key={model} className="bg-white p-3 rounded shadow-sm">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm text-gray-600 capitalize">{model} Model:</span>
+                              <div className="text-right">
+                                <div className="text-sm font-medium">{pred.disease}</div>
+                                <div className="text-xs text-gray-500">{(pred.confidence * 100).toFixed(1)}%</div>
+                              </div>
                             </div>
+                            {/* Fixed top_predictions rendering with proper type safety */}
+                            {pred.top_predictions && pred.top_predictions.length > 0 && (
+                              <div className="mt-2">
+                                <h5 className="text-xs font-medium text-gray-600 mb-1">Top Predictions:</h5>
+                                <ul className="list-disc list-inside text-xs text-gray-700 pl-2 space-y-1">
+                                  {pred.top_predictions.map((item, index) => (
+                                    <li key={index}>
+                                      {item.disease} – {(item.confidence * 100).toFixed(1)}%
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
