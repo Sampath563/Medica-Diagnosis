@@ -186,7 +186,7 @@ const HealthDiagnosis: React.FC = () => {
     setPrediction(null);
 
     try {
-      const backendBaseUrl = 'http://localhost:8000';
+    const backendBaseUrl = import.meta.env.VITE_BACKEND_URL;
 
       const response = await fetch(`${backendBaseUrl}/predict`, {
         method: 'POST',
