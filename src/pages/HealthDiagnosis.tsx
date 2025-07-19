@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Activity, Heart, Thermometer, Droplets, User, Calendar, AlertCircle, CheckCircle, Loader2, Plus } from 'lucide-react';
 import NavigationBar from '../components/NavigationBar';
 import { useNavigate } from 'react-router-dom';
+import FullNavigationBar from '../components/FullNavigationBar';
 
 // Updated interfaces to support top_predictions
 interface SinglePrediction {
@@ -134,18 +135,34 @@ const HealthDiagnosis: React.FC = () => {
     }));
   };
 
-  const handleSubmit = async () => {
-    // Check required fields
-    if (!formData.symptoms || !formData.age || !formData.gender || !formData.severity || 
-        !formData.temperature || !formData.heart_rate || !formData.blood_pressure || 
-        !formData.oxygen_saturation) {
-      setError('Please fill in all required fields');
-      return;
-    }
+  // Function to check if all fields are filled
+  const isFormValid = () => {
+    return (
+      formData.symptoms.trim() !== '' &&
+      formData.age.trim() !== '' &&
+      formData.gender.trim() !== '' &&
+      formData.severity.trim() !== '' &&
+      formData.temperature.trim() !== '' &&
+      formData.heart_rate.trim() !== '' &&
+      formData.blood_pressure.trim() !== '' &&
+      formData.oxygen_saturation.trim() !== '' &&
+      !tempError &&
+      !heartRateError &&
+      !bpError &&
+      !oxygenSatError
+    );
+  };
 
-    // Also check if any inline vital sign errors exist before submission
-    if (tempError || heartRateError || bpError || oxygenSatError) {
-      setError('Please fix the errors in vital signs before submitting');
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError(null);
+    setSymptomsError(null);
+    setPrediction(null);
+
+    // Check if all fields are filled
+    if (!isFormValid()) {
+      setError('Please fill in all required fields with valid values before getting diagnosis.');
+      setLoading(false);
       return;
     }
 
@@ -167,33 +184,27 @@ const HealthDiagnosis: React.FC = () => {
     ];
 
     const inputSymptoms = formData.symptoms
-      .toLowerCase()
       .split(',')
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
+      .map(symptom => symptom.trim().toLowerCase())
+      .filter(s => s !== '');
 
     const invalidSymptoms = inputSymptoms.filter(symptom => !allowedSymptoms.includes(symptom));
 
     if (invalidSymptoms.length > 0) {
       setSymptomsError(`Invalid symptom(s): ${invalidSymptoms.join(', ')}`);
+      setLoading(false);
       return;
     }
 
-    // Proceed to backend submission
-    setLoading(true);
-    setError(null);
-    setSymptomsError(null);
-    setPrediction(null);
-
     try {
-    const backendBaseUrl = import.meta.env.VITE_BACKEND_URL;
+      const backendBaseUrl = import.meta.env.VITE_BACKEND_URL;
 
       const response = await fetch(`${backendBaseUrl}/predict`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
@@ -211,16 +222,15 @@ const HealthDiagnosis: React.FC = () => {
         all_predictions: {}
       };
 
-      // Transform backend predictions to match our interface
+      // Transform backend predictions to match our interface with top_predictions support
       for (const [model, pred] of Object.entries(backendPredictions)) {
         transformedPrediction.all_predictions[model] = {
           disease: pred.prediction,
           confidence: pred.confidence,
-          // Safely handle top_predictions - this should now work without TypeScript errors
           top_predictions: pred.top_predictions || undefined
         };
       }
-      
+
       setPrediction(transformedPrediction);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -259,8 +269,8 @@ const HealthDiagnosis: React.FC = () => {
 
   return (
     <>
-      <NavigationBar />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 mt-10">
+      <FullNavigationBar />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-16">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="text-center mb-8">
@@ -447,8 +457,12 @@ const HealthDiagnosis: React.FC = () => {
                 <div className="flex space-x-4">
                   <button
                     onClick={handleSubmit}
-                    disabled={loading}
-                    className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
+                    disabled={loading || !isFormValid()}
+                    className={`flex-1 py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center ${
+                      loading || !isFormValid() 
+                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
                   >
                     {loading ? (
                       <>
@@ -524,7 +538,7 @@ const HealthDiagnosis: React.FC = () => {
                                 <div className="text-xs text-gray-500">{(pred.confidence * 100).toFixed(1)}%</div>
                               </div>
                             </div>
-                            {/* Fixed top_predictions rendering with proper type safety */}
+                            {/* Top predictions rendering */}
                             {pred.top_predictions && pred.top_predictions.length > 0 && (
                               <div className="mt-2">
                                 <h5 className="text-xs font-medium text-gray-600 mb-1">Top Predictions:</h5>
